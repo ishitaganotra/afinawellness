@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us — Afina</title>
+  <meta name="description" content="Get help with Afina. Find answers to common questions or reach our support team directly.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Rethink+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; max-width: 100%; }
+    body {
+      font-family: 'Rethink Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #2B2322;
+      background: linear-gradient(135deg, #FAF7F3 0%, #F3EDE5 100%);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Sticky header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(247, 243, 238, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      width: 100%;
+      border-bottom: 1px solid rgba(43, 35, 34, 0.06);
+    }
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; }
+    .nav-logo-icon { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-logo-text { font-size: 18px; font-weight: 700; color: #2B2322; letter-spacing: -0.01em; }
+    .nav-beta {
+      font-size: 11px; font-weight: 600; color: #6B6460;
+      background: #E4E0DB; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.03em;
+    }
+    .nav-links { display: flex; align-items: center; gap: 36px; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: #4A4442; transition: color 0.15s; }
+    .nav-links a:hover { color: #2B2322; }
+    .nav-cta {
+      background: #2B2322; color: #fff !important; padding: 11px 22px;
+      border-radius: 999px; font-weight: 600; font-size: 14px;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+    .mobile-menu-btn {
+      display: none; background: none; border: none; padding: 8px;
+      flex-direction: column; gap: 5px;
+    }
+    .mobile-menu-btn span {
+      display: block; width: 22px; height: 2px; background: #2B2322; border-radius: 2px;
+    }
+    .mobile-nav {
+      display: none; flex-direction: column; background: #F7F3EE;
+      padding: 16px 20px 24px; border-bottom: 1px solid rgba(44,61,51,0.1);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav-link {
+      font-size: 16px; font-weight: 500; color: #2B2322; text-decoration: none;
+      padding: 14px 0; border-bottom: 1px solid rgba(44,61,51,0.08);
+    }
+    .mobile-nav-link:last-child { border-bottom: none; }
+    .mobile-nav-cta {
+      margin-top: 8px; background: #2B2322; color: #fff; border-radius: 999px;
+      padding: 14px 24px; text-align: center; border-bottom: none;
+    }
+
+    /* ── Page header ── */
+    .page-header { padding: 72px 0 48px; text-align: center; }
+    .page-header h1 {
+      font-family: 'Rethink Sans', sans-serif;
+      font-size: clamp(36px, 5vw, 48px); font-weight: 600;
+      letter-spacing: -0.02em; line-height: 1.1;
+      margin-bottom: 16px; color: #2B2322;
+    }
+    .page-header p {
+      font-size: 17px; color: #6B6460; max-width: 480px; margin: 0 auto; line-height: 1.7;
+    }
+
+    /* ── Contact card ── */
+    .contact-section { padding: 20px 0; }
+    .contact-card {
+      background: #fff; border-radius: 20px; padding: 40px;
+      border: 1px solid rgba(43, 35, 34, 0.08);
+      box-shadow: 0 4px 24px rgba(43, 35, 34, 0.05);
+      text-align: center;
+    }
+    .contact-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; color: #2B2322; }
+    .contact-card p { font-size: 15px; color: #6B6460; margin-bottom: 24px; }
+    .contact-email {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #2B2322; color: #fff;
+      padding: 14px 32px; border-radius: 999px;
+      font-size: 16px; font-weight: 600;
+      transition: opacity 0.15s, transform 0.15s;
+      box-shadow: 0 2px 12px rgba(43, 35, 34, 0.18);
+    }
+    .contact-email:hover { opacity: 0.85; transform: translateY(-2px); }
+    .response-note { font-size: 13px; color: #6B6460; margin-top: 16px; }
+
+    /* ── FAQ ── */
+    .faq-section { padding: 40px 0 80px; }
+    .faq-section h2 {
+      font-family: 'Rethink Sans', sans-serif;
+      font-size: 28px; font-weight: 700; letter-spacing: -0.01em;
+      margin-bottom: 32px; color: #2B2322;
+    }
+    .faq-group { margin-bottom: 40px; }
+    .faq-group-title {
+      font-size: 12px; font-weight: 700; color: #2B2322;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;
+    }
+    .faq-item {
+      background: #fff; border-radius: 16px;
+      border: 1px solid rgba(43, 35, 34, 0.08);
+      margin-bottom: 8px; overflow: hidden;
+    }
+    .faq-question {
+      width: 100%; text-align: left; padding: 20px 24px;
+      font-size: 15px; font-weight: 600; color: #2B2322;
+      background: none; display: flex; justify-content: space-between;
+      align-items: center; gap: 16px; transition: color 0.2s;
+    }
+    .faq-question:hover { color: #2B2322; }
+    .faq-chevron {
+      width: 20px; height: 20px; min-width: 20px;
+      border-radius: 50%; background: #EFE7F2;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .faq-chevron svg { width: 12px; height: 12px; stroke: #87509F; }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); background: #87509F; }
+    .faq-item.open .faq-chevron svg { stroke: #fff; }
+    .faq-answer {
+      display: none; padding: 0 24px 20px;
+      font-size: 15px; color: #6B6460; line-height: 1.7;
+    }
+    .faq-item.open .faq-answer { display: block; }
+    .faq-answer a { color: #2B2322; text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ── Footer ── */
+    .site-footer {
+      background: transparent; padding: 48px 32px;
+      border-top: 1px solid rgba(44, 61, 51, 0.12);
+    }
+    .site-footer-inner {
+      max-width: 1160px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .site-footer-copy { font-size: 13px; color: rgba(44, 61, 51, 0.7); }
+    .site-footer-links { display: flex; gap: 32px; }
+    .site-footer-links a { font-size: 14px; color: rgba(44, 61, 51, 0.7); transition: color 0.2s; }
+    .site-footer-links a:hover { color: #2C3D33; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; }
+      .nav-inner { padding: 0 20px; }
+      .page-header h1 { font-size: 32px; }
+      .contact-card { padding: 28px 20px; }
+      .site-footer { padding: 40px 20px; }
+      .site-footer-inner { flex-direction: column-reverse; align-items: center; gap: 16px; text-align: center; }
+      .site-footer-links { flex-wrap: wrap; gap: 20px; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <nav>
+      <div class="nav-inner">
+        <a href="/" class="nav-logo">
+          <img src="../assets/Afina_wordmark.svg" alt="Afina icon" class="nav-logo-icon">
+          <span class="nav-logo-text">Afina</span>
+          <span class="nav-beta">Beta</span>
+        </a>
+        <div class="nav-links">
+          <a href="/#features">Features</a>
+          <a href="/#pricing">Pricing</a>
+          <a href="/contact-us">Contact Us</a>
+          <a href="/#pricing" class="nav-cta">Get 14 days free</a>
+        </div>
+        <button class="mobile-menu-btn" aria-label="Menu" id="mobile-menu-btn">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="mobile-nav" id="mobile-nav">
+      <a href="/#features" class="mobile-nav-link">Features</a>
+      <a href="/#pricing" class="mobile-nav-link">Pricing</a>
+      <a href="/contact-us" class="mobile-nav-link">Contact Us</a>
+      <a href="/#pricing" class="mobile-nav-link mobile-nav-cta">Get 14 days free</a>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <h1>Contact us</h1>
+    <p>We're here to help. Find answers below or reach out directly — we typically reply within 24 hours.</p>
+  </div>
+
+  <div class="container">
+
+    <section class="contact-section">
+      <div class="contact-card">
+        <h2>Get in touch</h2>
+        <p>Can't find what you're looking for? Send us an email and we'll get back to you.</p>
+        <a href="mailto:support@hormoniousapp.com" class="contact-email">
+          support@hormoniousapp.com
+        </a>
+        <p class="response-note">Typical response time: within 24 hours</p>
+      </div>
+    </section>
+
+    <section class="faq-section">
+      <h2>Frequently asked questions</h2>
+
+      <div class="faq-group">
+        <div class="faq-group-title">Getting started</div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How does Afina know which phase I'm in?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">You enter the date of your last period during onboarding, and the app calculates your current phase (menstrual, follicular, ovulation, or luteal) automatically. Your targets update each day based on where you are in your cycle.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            What if my cycle is irregular?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">That's completely normal. You can update your last period date at any time from the app settings, and the app will recalculate your phase. We're also building cycle prediction that will get smarter the longer you use the app.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            I'm not cycling right now (pregnant, postpartum, menopause). Can I still use the app?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">Yes — Afina is built for every stage of womanhood. During onboarding, select your current life stage (pregnant, postpartum, perimenopause, menopause, etc.) and the app switches to a fully different set of targets, guidance, and coaching specific to that stage.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-title">Subscription &amp; billing</div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I cancel my subscription?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">Subscriptions are managed through Apple. To cancel, go to Settings on your iPhone → tap your name → Subscriptions → Afina → Cancel Subscription. You'll retain access until the end of your billing period.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I request a refund?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">Refunds are handled by Apple. Visit <a href="https://reportaproblem.apple.com" target="_blank" rel="noopener">reportaproblem.apple.com</a>, sign in with your Apple ID, find the Afina charge, and select "Request a Refund." You can also email us at support@hormoniousapp.com and we'll help guide you through it.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            I was charged but I don't have access. What do I do?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">Try restoring your purchase: open the app, go to Settings → Restore Purchases. If that doesn't work, email us at support@hormoniousapp.com with your Apple ID email and we'll sort it out.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-title">App &amp; account</div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I log food?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">Just tell your AI coach what you ate in plain language — "I had scrambled eggs with toast and a coffee" — and the coach handles the rest. No barcode scanning, no searching databases. You can also type or use voice input.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            How do I delete my account and data?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">Email us at support@hormoniousapp.com with the subject "Delete my account" and your registered email address. We'll permanently delete your account and all associated data within 30 days.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            The app is crashing or not working. What should I do?
+            <span class="faq-chevron"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </button>
+          <div class="faq-answer">First, try force-quitting and reopening the app, then check for updates in the App Store. If the issue persists, email us at support@hormoniousapp.com with a description of what happened and your device model and iOS version — we'll investigate right away.</div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <p class="site-footer-copy">&copy; 2026 Afina. All rights reserved.</p>
+      <nav class="site-footer-links">
+        <a href="/legal/privacy-policy.html">Privacy policy</a>
+        <a href="/legal/terms-of-service.html">Terms of service</a>
+        <a href="/contact-us">Contact Us</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('mobile-menu-btn').addEventListener('click', function () {
+      document.getElementById('mobile-nav').classList.toggle('open');
+    });
+    document.querySelectorAll('.mobile-nav-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        document.getElementById('mobile-nav').classList.remove('open');
+      });
+    });
+    document.querySelectorAll('.faq-question').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = btn.closest('.faq-item');
+        var isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(function (i) { i.classList.remove('open'); });
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+  </script>
+
+</body>
+</html>

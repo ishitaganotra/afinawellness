@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Afina</title>
+<meta name="robots" content="noindex">
+<script>
+  // GitHub Pages serves this for any unknown path. Invite links are shared
+  // as afinawellness.com/i/CODE — rewrite those to the static invite page
+  // (/i/?c=CODE). Anything else falls through to the message below.
+  (function () {
+    var m = location.pathname.match(/^\/i\/([A-Za-z0-9-]{4,20})\/?$/);
+    if (m) location.replace('/i/?c=' + encodeURIComponent(m[1].toUpperCase()));
+  })();
+</script>
+<style>
+  body {
+    background: #FCF7F5; color: #2D2A33;
+    font-family: "DM Sans", -apple-system, sans-serif;
+    min-height: 100svh; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 24px;
+  }
+  a { color: #2D2A33; }
+</style>
+</head>
+<body>
+  <p>That page doesn't exist. <a href="/">Go to Afina</a></p>
+</body>
+</html>

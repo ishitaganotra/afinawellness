@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Afina — Your body changes every week. Your fitness app should too.</title>
+  <meta name="description" content="Afina: calories, macros and workouts, in sync with your hormones. Personalized targets and an AI coach that adapt to your hormonal phase, from your first period through menopause.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo_icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=Rethink+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; max-width: 100%; }
+    body {
+      font-family: 'Rethink Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #2B2322;
+      background: #FAF5F5;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+
+
+    /* ── Micro-animations ─────────────────────────────────────────── */
+    :root { --ease-soft: cubic-bezier(0.43, 0.195, 0.02, 1); }
+
+    /* Scroll reveal: elements rise + fade in as they enter the viewport.
+       JS adds .reveal to targets and .revealed when visible. */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s var(--ease-soft), transform 0.7s var(--ease-soft);
+      transition-delay: var(--reveal-delay, 0s);
+    }
+    .reveal.revealed { opacity: 1; transform: none; }
+    /* Inside scroll-snap containers, transforms make iOS re-snap and jump —
+       these reveal with opacity only. */
+    .testimonial-card.reveal { transform: none; }
+
+    /* Hover lift on cards */
+    .work-item, .testimonial-card, .pricing-card, .phases-list li {
+      transition: transform 0.6s var(--ease-soft), box-shadow 0.6s var(--ease-soft);
+    }
+    .pricing-card:hover, .testimonial-card:hover {
+      transform: translateY(-6px);
+    }
+    .pricing-card:hover { box-shadow: 0 16px 40px rgba(45,42,51,0.10); }
+
+    /* Nav links: underline slides in */
+    .nav-links a:not(.nav-cta) {
+      position: relative;
+    }
+    .nav-links a:not(.nav-cta)::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 100%;
+      bottom: -6px;
+      height: 1.5px;
+      background: currentColor;
+      transition: right 0.6s var(--ease-soft);
+    }
+    .nav-links a:not(.nav-cta):hover::after { right: 0; }
+
+    /* CTA buttons: label slides up, duplicate slides in from below.
+       The .btn-label is the clipping window; only .btn-text moves. */
+    .btn-swap .btn-label {
+      display: inline-block;
+      overflow: hidden;
+    }
+    .btn-swap .btn-text {
+      display: inline-block;
+      position: relative;
+      transition: transform 0.6s var(--ease-soft);
+    }
+    .btn-swap .btn-text::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 0; top: 100%;
+      width: 100%;
+      text-align: center;
+    }
+    .btn-swap:hover .btn-text { transform: translateY(-100%); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .btn-swap .btn-label, .pricing-card, .testimonial-card { transition: none; }
+    }
+
+    /* ── Sticky header wrapper ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fff;
+      width: 100%;
+      box-shadow: 0 2px 2.5px rgba(0, 0, 0, 0.05);
+    }
+    .nav-inner {
+      padding: 0 90px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 96px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-logo-icon {
+      height: 36px;
+      width: auto;
+      flex-shrink: 0;
+    }
+    .nav-logo-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      color: #554E60;
+      line-height: 1;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 64px;
+    }
+    .nav-links a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #37442F;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: #554E60; }
+    .nav-cta {
+      background: #554E60;
+      color: #fff !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 51px;
+      padding: 12px 24px;
+      border-radius: 100px;
+      font-weight: 500;
+      font-size: 16px;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      padding: 8px;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .mobile-nav {
+      display: none;
+      flex-direction: column;
+      background: #fff;
+      padding: 16px 20px 24px;
+      border-bottom: 1px solid rgba(85,78,96,0.12);
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav-link {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #37442F;
+      text-decoration: none;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(85,78,96,0.08);
+    }
+    .mobile-nav-link:last-child { border-bottom: none; }
+    .mobile-nav-cta {
+      margin-top: 8px;
+      background: #554E60;
+      color: #fff;
+      border-radius: 100px;
+      padding: 14px 24px;
+      text-align: center;
+      border-bottom: none;
+    }
+    .mobile-menu-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #554E60;
+      border-radius: 2px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      z-index: 5; /* lets the bubble bleed over the next section */
+      background: #FAF5F5;
+      display: flex;
+      align-items: stretch;
+      /* Full-bleed at every width. Height follows the Figma's 50vw ratio
+         up to its 872px, but never fills a short screen (78vh keeps the
+         next section peeking). The photo panel below is what's capped. */
+      min-height: clamp(560px, 50vw, min(872px, 78vh));
+    }
+    .hero-copy {
+      width: 51%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      padding: 80px 60px 80px clamp(32px, 9vw, 154px);
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(40px, 4vw, 70px);
+      font-weight: 400;
+      line-height: 1;
+      color: #2D2A33;
+    }
+    .hero h1 em { font-style: italic; }
+    .hero-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(17px, 1.4vw, 24px);
+      color: rgba(45, 42, 51, 0.8);
+      line-height: 1.4;
+      max-width: 580px;
+    }
+    .hero-badge img { height: 49px; width: auto; }
+    .hero-media {
+      width: 49%;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+    /* Art-directed sources (see <picture> in the hero): each breakpoint
+       gets a pre-cropped, face-centered image whose shape matches its
+       container, so plain centered cover barely crops. */
+    .hero-slide { object-position: 50% 50%; }
+    .hero-slide.active { opacity: 1; }
+    .hero-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(85, 78, 96, 0.3);
+      pointer-events: none;
+    }
+    .hero-bubble {
+      position: absolute;
+      left: 51%;
+      bottom: 0;
+      transform: translate(-50%, 53%);
+      /* Scales with the viewport (178px at the 1728px design width),
+         capped at the design size. */
+      width: clamp(108px, 9.27vw, 160px);
+      height: clamp(108px, 9.27vw, 160px);
+      border-radius: 50%;
+      background: #E1A0AD;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(17px, 1.4vw, 24px);
+      line-height: 0.9;
+      transition: background 0.9s ease;
+    }
+    .hero-bubble em { font-style: italic; }
+    .hero-bubble-word {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+    .hero-bubble-word.active { opacity: 1; }
+    .btn-dark {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2B2322;
+      color: #fff;
+      padding: 15px 32px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: opacity 0.15s, transform 0.15s;
+      box-shadow: 0 2px 12px rgba(43, 35, 34, 0.18);
+    }
+    .btn-dark:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    /* ── Section 2: Features (Know your body better) ── */
+    .work-section {
+      /* pink tint over the page bg; top padding leaves room for the hero bubble bleed */
+      background: #F7ECEE;
+      padding: 180px 32px 120px;
+    }
+    .work-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .work-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 3vw, 50px);
+      font-weight: 400;
+      line-height: 1;
+      color: #2D2A33;
+      max-width: 617px;
+      margin: 0 auto 64px;
+    }
+    .work-heading em { font-style: italic; }
+    .work-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(17px, 1.4vw, 24px);
+      color: rgba(45, 42, 51, 0.8);
+      line-height: 1.4;
+      max-width: 992px;
+      margin: 0 auto 64px;
+    }
+    .work-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 89px;
+      row-gap: 24px;
+      text-align: left;
+    }
+    .work-item {
+      border-top: 1px solid;
+      padding-top: 20px;
+      min-height: 99px;
+    }
+    .work-item h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 1;
+      color: #2D2A33;
+      margin-bottom: 12px;
+    }
+    .work-item p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(16px, 1.2vw, 20px);
+      color: rgba(45, 42, 51, 0.8);
+      line-height: 1.4;
+    }
+    .work-item--pink   { border-top-color: #E1A0AD; }
+    .work-item--green  { border-top-color: #7C9E6A; }
+    .work-item--purple { border-top-color: #A483B2; }
+    .work-item--sage   { border-top-color: #AEC1A2; }
+
+    /* Plan card */
+    .plan-card {
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      padding: 20px;
+      width: 100%;
+    }
+    .plan-title { font-size: 20px; font-weight: 700; color: #2B2322; margin-bottom: 4px; }
+    .plan-meta  { font-size: 12px; color: #9B9590; margin-bottom: 8px; }
+    .plan-desc  { font-size: 12px; color: #6B6460; line-height: 1.5; margin-bottom: 16px; }
+    .plan-section-label { font-size: 13px; font-weight: 700; color: #2B2322; margin-bottom: 8px; }
+    .plan-exercise {
+      background: #F7F3EE;
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      border-left: 3px solid #D4B8C0;
+    }
+    .plan-exercise-name { font-size: 13px; font-weight: 600; color: #2B2322; }
+    .plan-exercise-meta { font-size: 11px; color: #9B9590; margin-top: 2px; }
+    .plan-check {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid #C8C3BC;
+      flex-shrink: 0;
+    }
+    .plan-exercise-peek { opacity: 0.5; }
+
+    /* Calendar card */
+    .cal-card {
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      padding: 20px;
+      width: 100%;
+    }
+    .cal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .cal-title  { font-size: 15px; font-weight: 700; color: #2B2322; }
+    .cal-meta   { font-size: 11px; color: #9B9590; margin-top: 2px; }
+    .cal-close  { font-size: 14px; color: #6B6460; cursor: pointer; }
+    .cal-tabs   { display: flex; gap: 6px; margin-bottom: 14px; overflow: hidden; }
+    .cal-tab {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1.5px solid #D4CFC9;
+      color: #6B6460;
+      white-space: nowrap;
+    }
+    .cal-tab.active { background: #87509F; color: #fff; border-color: #87509F; }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+    .cal-dow  { font-size: 10px; font-weight: 600; color: #9B9590; padding: 4px 0; }
+    .cal-day  { font-size: 12px; color: #2B2322; padding: 6px 2px; border-radius: 50%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .cal-ovul { border: 1.5px solid #87509F; color: #87509F; font-weight: 600; }
+    .cal-today { background: #87509F; color: #fff; border-color: #87509F; }
+    .cal-mens { border: 1.5px dashed #CF5970; color: #CF5970; }
+
+    @media (max-width: 600px) {
+      .work-section { padding: 130px 20px 80px; }
+      .work-heading { margin-bottom: 32px; }
+      .work-sub { margin-bottom: 32px; }
+      .privacy { padding: 64px 20px; }
+    }
+
+    /* ── Section 3: Ask anything ── */
+    .ask-section {
+      background: #FAF5F5;
+      font-family: 'DM Sans', sans-serif;
+      padding: 100px 32px 50px;
+      text-align: center;
+    }
+    .ask-inner {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .ask-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 20px;
+    }
+    @keyframes spinOnce {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .ask-icon.spin {
+      animation: spinOnce 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .ask-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 2.8vw, 48px);
+      font-weight: 400;
+      line-height: 1.1;
+      color: #2D2A33;
+      margin-bottom: 16px;
+    }
+    .ask-heading em { font-style: italic; }
+    .ask-sub {
+      font-size: clamp(14px, 1.6vw, 16px);
+      color: rgba(45, 42, 51, 0.7);
+      line-height: 1.65;
+      max-width: 560px;
+      margin: 0 auto 36px;
+    }
+    .ask-tabs {
+      display: inline-flex;
+      align-items: center;
+      background: #EFE9EC;
+      border-radius: 999px;
+      padding: 10px 16px;
+      gap: 2px;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    .ask-tab-indicator {
+      position: absolute;
+      background: #554E60;
+      border-radius: 999px;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1), height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .ask-tab {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(45, 42, 51, 0.7);
+      background: none;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 0.2s;
+      font-family: inherit;
+      white-space: nowrap;
+      position: relative;
+      z-index: 1;
+    }
+    .ask-tab.active {
+      color: #fff;
+      font-weight: 500;
+    }
+    .ask-ui {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .ask-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #ffffff;
+      border-radius: 999px;
+      padding: 16px 20px;
+      margin-bottom: 0;
+      box-shadow: 0 4px 24px rgba(43,35,34,0.08), 0 1px 4px rgba(43,35,34,0.04);
+    }
+    .ask-plus {
+      font-size: 22px;
+      font-weight: 300;
+      color: #2D2A33;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .ask-prompt {
+      flex: 1;
+      font-size: 15px;
+      color: #2D2A33;
+      text-align: left;
+    }
+    .ask-mic {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+    .ask-below {
+      position: relative;
+      margin-top: 16px;
+      min-height: 480px;
+    }
+    /* Thinking state */
+    .ask-thinking {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-start;
+      padding: 10px 4px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .ask-thinking.visible { opacity: 1; }
+    .ask-thinking-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    @keyframes thinkSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .ask-thinking-icon.spinning {
+      animation: thinkSpin 1s linear infinite;
+    }
+    .ask-thinking-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      font-size: 14px;
+      color: #9B9590;
+      letter-spacing: 0.01em;
+    }
+    @keyframes dotPulse {
+      0%, 20%  { content: 'Thinking';    }
+      40%      { content: 'Thinking.';   }
+      60%      { content: 'Thinking..';  }
+      80%,100% { content: 'Thinking...'; }
+    }
+
+    /* Response card */
+    .ask-response {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px 24px 24px;
+      text-align: left;
+      box-shadow: 0 4px 24px rgba(43,35,34,0.07);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1);
+      pointer-events: none;
+    }
+    .ask-response.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .ask-response-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2D2A33;
+      margin-bottom: 10px;
+    }
+    .ask-response-title:empty { display: none; }
+    .ask-response-body {
+      font-size: 14px;
+      color: rgba(45, 42, 51, 0.85);
+      line-height: 1.7;
+      margin-bottom: 0;
+    }
+    .ask-response-body:not(:empty) { margin-bottom: 16px; }
+    .ask-response-subtitle {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2D2A33;
+      margin-bottom: 12px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .ask-response-subtitle.visible { opacity: 1; }
+    .ask-response-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ask-response-list li {
+      font-size: 14px;
+      color: rgba(45, 42, 51, 0.85);
+      line-height: 1.6;
+      padding-left: 16px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .ask-response-list li.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .ask-response-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: #9B9590;
+    }
+    .ask-response-list li strong { color: #2D2A33; }
+
+    /* Food thumb in input */
+    .ask-prompt-thumb {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* Food log table */
+    .ask-food-table {
+      border: 1px solid #EEEBE7;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 0;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1);
+    }
+    .ask-food-table.visible { opacity: 1; transform: translateY(0); }
+    .ask-food-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 14px;
+      border-bottom: 1px solid #EEEBE7;
+    }
+    .ask-food-row:last-child { border-bottom: none; }
+    .ask-food-row.total { background: #F5F3F0; }
+    .ask-food-name { font-size: 14px; font-weight: 600; color: #2D2A33; line-height: 1.4; }
+    .ask-food-serving { font-size: 13px; color: #9B9590; margin-top: 2px; }
+    .ask-food-macros { text-align: right; flex-shrink: 0; }
+    .ask-food-cal { font-size: 14px; font-weight: 700; color: #2D2A33; }
+    .ask-food-protein { font-size: 13px; color: #9B9590; margin-top: 2px; }
+
+    /* Exercise cards */
+    .ask-exercise-section {
+      margin-top: 16px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1);
+      scrollbar-width: thin;
+      scrollbar-color: #D8C9C5 transparent;
+    }
+    .ask-exercise-section::-webkit-scrollbar { width: 4px; }
+    .ask-exercise-section::-webkit-scrollbar-thumb { background: #554E60; border-radius: 4px; }
+    .ask-exercise-section::-webkit-scrollbar-track { background: transparent; }
+    .ask-exercise-section.visible { opacity: 1; transform: translateY(0); }
+    .ask-exercise-section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2C3D33;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    }
+    .ask-exercise-card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .ask-exercise-accent {
+      width: 6px;
+      background: #554E60;
+      flex-shrink: 0;
+    }
+    .ask-exercise-content {
+      flex: 1;
+      padding: 14px 14px 14px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ask-exercise-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2C3D33;
+      margin-bottom: 5px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    }
+    .ask-exercise-meta {
+      font-size: 12px;
+      color: #505351;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    }
+    .ask-exercise-meta span { color: #35442F; }
+    .ask-exercise-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 11px;
+      border: 2px solid #49454F;
+      flex-shrink: 0;
+    }
+
+    /* ── Section 8: Pricing / CTA ── */
+    .cta-section {
+      background: #FAF5F5;
+      padding: 110px 32px;
+      text-align: center;
+    }
+    .cta-inner {
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+    .cta-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px, 2.8vw, 48px);
+      font-weight: 400;
+      color: #2D2A33;
+      line-height: 1.15;
+      margin-bottom: 24px;
+    }
+    .cta-heading em { font-style: italic; }
+    .cta-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(15px, 1.1vw, 18px);
+      color: rgba(45, 42, 51, 0.8);
+      line-height: 1.5;
+      max-width: 560px;
+      margin: 0 auto 32px;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #554E60;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: 100px;
+      margin-bottom: 64px;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .cta-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 44px;
+      text-align: left;
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+    .pricing-card {
+      background: transparent;
+      border: 1px solid rgba(45, 42, 51, 0.5);
+      border-radius: 6px;
+      padding: 40px 44px 48px;
+      position: relative;
+    }
+    .pricing-card.featured {
+      background: #fff;
+      border: none;
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -20px;
+      left: 44px; /* aligned with the card's content edge (Annual text) */
+      background: #5F7A44;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      padding: 9px 18px;
+    }
+    .pricing-period {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: rgba(45, 42, 51, 0.7);
+      margin-bottom: 10px;
+    }
+    .pricing-price-block {
+      margin-bottom: 28px;
+    }
+    .pricing-free {
+      font-family: 'DM Serif Display', serif;
+      font-size: 32px;
+      font-weight: 400;
+      color: #2D2A33;
+      display: block;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .pricing-amount {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: rgba(45, 42, 51, 0.85);
+      display: block;
+      line-height: 1.2;
+    }
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: rgba(45, 42, 51, 0.85);
+    }
+    .pricing-check {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ── Section 5: Testimonials ── */
+    .testimonials-section {
+      background: #F7ECEE;
+      padding: 100px 32px 80px;
+    }
+    .testimonials-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .testimonials-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(30px, 2.4vw, 40px);
+      font-weight: 400;
+      line-height: 1;
+      color: #2D2A33;
+      margin-bottom: 72px;
+    }
+    .testimonials-heading em { font-style: italic; }
+    .testimonials-cards {
+      --t-gap: clamp(32px, 6vw, 120px);
+      display: flex;
+      gap: var(--t-gap);
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .testimonials-cards::-webkit-scrollbar { display: none; }
+    .testimonial-card {
+      flex: 0 0 calc((100% - 2 * var(--t-gap)) / 3);
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .testimonial-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 56px;
+    }
+    .testimonial-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(45, 42, 51, 0.2);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .testimonial-dot.active { background: #554E60; }
+    .testimonial-stars {
+      font-size: 13px;
+      letter-spacing: 5px;
+      color: #2D2A33;
+      margin-bottom: 28px;
+    }
+    .testimonial-quote {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: rgba(45, 42, 51, 0.85);
+      line-height: 1.55;
+      flex: 1;
+      margin-bottom: 32px;
+      max-width: 320px;
+    }
+    .testimonial-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      color: #2D2A33;
+      margin-bottom: 4px;
+    }
+    .testimonial-meta {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: rgba(45, 42, 51, 0.7);
+    }
+
+    /* ── Privacy ── */
+    .privacy {
+      background: #F7ECEE;
+      padding: 100px 32px;
+    }
+    .privacy-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 64px;
+    }
+    .privacy-copy { max-width: 490px; }
+    .privacy-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(30px, 2.6vw, 44px);
+      font-weight: 400;
+      line-height: 1.1;
+      color: #2D2A33;
+      margin-bottom: 24px;
+    }
+    .privacy-heading em { font-style: italic; }
+    .privacy-body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(16px, 1.2vw, 20px);
+      color: rgba(45, 42, 51, 0.8);
+      line-height: 1.4;
+      margin-bottom: 24px;
+    }
+    .privacy-link {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(15px, 1.1vw, 18px);
+      color: #2D2A33;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .privacy-visual { flex-shrink: 0; width: min(664px, 46vw); }
+    .privacy-visual img { width: 100%; height: auto; }
+
+    /* ── Section 5: Created for anyone (phases) ── */
+    .phases-section {
+      display: flex;
+      align-items: stretch;
+      background: #FAF5F5;
+    }
+    .phases-photo { width: 49.4%; }
+    .phases-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .phases-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 90px clamp(32px, 7vw, 120px);
+    }
+    .phases-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(30px, 2.6vw, 44px);
+      font-weight: 400;
+      line-height: 1.1;
+      color: #2D2A33;
+      margin-bottom: 40px;
+      max-width: 420px;
+    }
+    .phases-heading em { font-style: italic; }
+    .phases-list { list-style: none; max-width: 480px; }
+    .phases-list li {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(18px, 1.4vw, 23px);
+      color: #2D2A33;
+      line-height: 1.1;
+      padding: 20px 0 16px;
+      border-bottom: 1px solid rgba(45, 42, 51, 0.25);
+    }
+    .phases-list li:first-child { padding-top: 0; }
+    .phases-list li:last-child { border-bottom: none; }
+    .phases-badge {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: #fff;
+      background: #5F8A6D;
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-left: 10px;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    .phases-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: clamp(14px, 1vw, 16px);
+      color: rgba(45, 42, 51, 0.7);
+      line-height: 1.4;
+      margin-top: 10px;
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      background: #fff;
+      padding: 0 90px;
+    }
+    .site-footer-inner {
+      height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .site-footer-copy {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: rgba(45, 42, 51, 0.7);
+    }
+    .site-footer-links {
+      display: flex;
+      gap: 48px;
+    }
+    .site-footer-links a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: #2D2A33;
+      transition: color 0.2s;
+    }
+    .site-footer-links a:hover { color: #554E60; }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+      .nav-inner { padding: 0 32px; height: 76px; }
+      .work-grid { grid-template-columns: 1fr; }
+      .privacy-inner { flex-direction: column; align-items: flex-start; gap: 40px; }
+      .privacy-visual { width: 100%; max-width: 500px; align-self: center; }
+      .hero { flex-direction: column; min-height: 0; }
+      .hero-copy { width: 100%; padding: 64px 32px; gap: 28px; }
+      .hero-media { width: 100%; height: 420px; }
+      .hero-bubble {
+        left: auto;
+        right: 32px;
+        width: 126px;
+        height: 126px;
+        font-size: 20px;
+        transform: translate(0, 50%);
+      }
+      .testimonials-section { padding: 60px 20px; }
+      .testimonial-card { flex: 0 0 100%; }
+      .pricing-cards { grid-template-columns: 1fr; }
+      .cta-section { padding: 60px 20px; }
+      .phases-section { flex-direction: column; }
+      .phases-photo { width: 100%; max-height: 420px; overflow: hidden; }
+      .phases-panel { padding: 56px 32px; }
+      .ask-tabs { display: flex; width: 100%; box-sizing: border-box; border-radius: 16px; padding: 6px 8px; }
+      .ask-tab { flex: 1; text-align: center; font-size: 12.5px; padding: 8px 4px; }
+      .ask-section { padding: 60px 20px 50px; }
+    }
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; }
+      .nav-inner { padding: 0 20px; width: 100%; max-width: 100%; }
+      .hero-copy { padding: 48px 20px; }
+      .hero-media { height: 320px; }
+      .hero-bubble { right: 20px; width: 108px; height: 108px; font-size: 17px; }
+      .site-footer { padding: 28px 20px; overflow: hidden; }
+      .site-footer-inner { height: auto; flex-direction: column-reverse; align-items: center; gap: 16px; text-align: center; }
+      .site-footer-links { flex-wrap: wrap; gap: 20px; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+  <!-- Nav -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="assets/logo_icon.svg" alt="" class="nav-logo-icon">
+        <span class="nav-logo-text">Afina</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://apps.apple.com/app/id6761498641" class="nav-cta btn-swap"><span class="btn-label"><span class="btn-text" data-label="Try free for 30 days">Try free for 30 days</span></span></a>
+      </div>
+      <button class="mobile-menu-btn" aria-label="Menu" id="mobile-menu-btn">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile nav drawer -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#features" class="mobile-nav-link">Features</a>
+    <a href="#pricing" class="mobile-nav-link">Pricing</a>
+    <a href="https://apps.apple.com/app/id6761498641" class="mobile-nav-link mobile-nav-cta">Try free for 30 days</a>
+  </div>
+
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-copy">
+      <h1>Work with your <em>hormones</em>, not against them</h1>
+      <p class="hero-sub">
+        Eat and move in sync with your body. Log your meals, get nutrition and
+        workouts matched to your phase, and lean on an AI coach who knows your
+        patterns. Built for every age and every stage.
+      </p>
+      <a href="https://apps.apple.com/app/id6761498641" class="hero-badge">
+        <img src="assets/appstore-badge.svg" alt="Download on the App Store">
+      </a>
+    </div>
+    <div class="hero-media">
+      <picture>
+        <img class="hero-slide hero-slide--moment active" src="assets/woman1-desktop.jpg" alt="Woman dancing outdoors">
+      </picture>
+      <picture>
+        <img class="hero-slide hero-slide--age" src="assets/woman2-desktop.jpg" alt="Older woman smiling in the sun">
+      </picture>
+      <picture>
+        <img class="hero-slide hero-slide--stage" src="assets/woman3-desktop.jpg" alt="Mother holding her newborn">
+      </picture>
+    </div>
+    <div class="hero-bubble" id="hero-bubble">
+      <span class="hero-bubble-word active"><span><em>Every</em><br>moment</span></span>
+      <span class="hero-bubble-word"><span><em>Every</em><br>age</span></span>
+      <span class="hero-bubble-word"><span><em>Every</em><br>stage</span></span>
+    </div>
+  </section>
+
+  <!-- ── Section 2: Features (Know your body better) ── -->
+  <section class="work-section" id="features">
+    <div class="work-inner">
+      <h2 class="work-heading">Know your body better <em>with every cycle</em></h2>
+      <p class="work-sub">Your hormones shape your energy, metabolism, cravings, and recovery every single week. When you understand your own rhythm, everything finally clicks</p>
+
+      <div class="work-grid">
+        <div class="work-item work-item--pink">
+          <h3>Effortless logging</h3>
+          <p>Easily track your cycle, mood, and daily symptoms</p>
+        </div>
+        <div class="work-item work-item--sage">
+          <h3>Mood &amp; Energy Mapping</h3>
+          <p>Make sense of physical and emotional shifts</p>
+        </div>
+        <div class="work-item work-item--green">
+          <h3>Personalized AI Coach</h3>
+          <p>Connect the dots with personalized insights</p>
+        </div>
+        <div class="work-item work-item--purple">
+          <h3>Phase-Based Living</h3>
+          <p>Sync food, fitness, and rest to your cycle</p>
+        </div>
+        <div class="work-item work-item--purple">
+          <h3>Proactive Alerts</h3>
+          <p>Get ahead of your period, PMS, and fatigue</p>
+        </div>
+        <div class="work-item work-item--pink">
+          <h3>Long-Term Pattern Spotting</h3>
+          <p>See your cycle&rsquo;s trends and patterns</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 3: Ask anything ── -->
+  <section class="ask-section">
+    <div class="ask-inner">
+      <img src="assets/logo_icon.svg" alt="Afina" class="ask-icon">
+      <h2 class="ask-heading">Ask <em>anything</em></h2>
+      <p class="ask-sub">Afina AI turns your questions into instant answers. Get personalized advice grounded in your body's data, and stay in sync all month long.</p>
+
+      <div class="ask-tabs" id="ask-tabs">
+        <div class="ask-tab-indicator" id="ask-tab-indicator"></div>
+        <button class="ask-tab active" data-tab="0">Bodily insights</button>
+        <button class="ask-tab" data-tab="1">Food logging</button>
+        <button class="ask-tab" data-tab="2">Customize plans</button>
+      </div>
+
+      <div class="ask-ui">
+        <div class="ask-input-row">
+          <span class="ask-plus">+</span>
+          <img id="ask-prompt-thumb" class="ask-prompt-thumb" src="" alt="" style="display:none">
+          <span class="ask-prompt" id="ask-prompt"></span>
+          <img src="assets/Mic-icon.svg" alt="mic" class="ask-mic">
+        </div>
+
+        <div class="ask-below">
+          <div class="ask-thinking" id="ask-thinking">
+            <img src="assets/logo_icon.svg" alt="" class="ask-thinking-icon" id="ask-thinking-icon">
+            <span class="ask-thinking-label" id="ask-thinking-label">Thinking</span>
+          </div>
+
+          <div class="ask-response" id="ask-response">
+          <div class="ask-response-title" id="ask-response-title"></div>
+          <div class="ask-response-body" id="ask-response-body"></div>
+          <div class="ask-response-subtitle" id="ask-response-subtitle"></div>
+          <ul class="ask-response-list" id="ask-response-list"></ul>
+        </div>
+        </div><!-- /.ask-below -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Privacy ── -->
+  <section class="privacy">
+    <div class="privacy-inner">
+      <div class="privacy-copy">
+        <h2 class="privacy-heading"><em>Private by design.</em> Your data stays with you on your device</h2>
+        <p class="privacy-body">Your personal cycle history never leaves your device. While most trackers send your intimate logs to the cloud, yours stay safely on your phone. Never shared, and never sold to anyone, that's our promise.</p>
+        <a href="legal/privacy-policy.html" class="privacy-link">Read our privacy policy</a>
+      </div>
+      <div class="privacy-visual">
+        <img src="assets/security.png" alt="Calendar with shield and lock illustrating on-device privacy">
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Section 6: Built for every phase ── -->
+  <section class="phases-section">
+    <div class="phases-photo">
+      <img src="assets/phases.jpg" alt="Five women of different ages and life stages">
+    </div>
+    <div class="phases-panel">
+      <h2 class="phases-heading">Created for anyone who’s had a <em>cycle</em></h2>
+      <ul class="phases-list">
+        <li>Regular cycling</li>
+        <li>Thyroid</li>
+        <li>PCOS</li>
+        <li>Endometriosis</li>
+        <li>Pregnant <span class="phases-badge">Coming soon</span></li>
+        <li>Menopause
+          <div class="phases-sub">Perimenopause, menopause, and postmenopause</div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── Section 7: Testimonials ── -->
+  <section class="testimonials-section">
+    <div class="testimonials-inner">
+      <h2 class="testimonials-heading">What women are <em>saying</em></h2>
+      <div class="testimonials-cards">
+        <div class="testimonial-card">
+          <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-quote">Afina is a godsend for me. It understands me so well. It has my fitness, period tracking, calorie, water intake tracking, and feedback tracker all in one app while having a coach that's both empathetic and always available for me</p>
+          <div class="testimonial-name">Neha Shroff</div>
+          <div class="testimonial-meta">Postpartum</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-quote">This app has been a game changer! I'm able to just send photos and describe my meals in order to understand what I need more of depending on what stage of the cycle I'm in.</p>
+          <div class="testimonial-name">Natalie B.</div>
+          <div class="testimonial-meta">Cycling user</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-quote">A few months of using Afina, I'm more in tune with my body than ever, and consistent in my weight loss journey for the first time - primarily because this time, I'm not doing it alone.</p>
+          <div class="testimonial-name">Nisha</div>
+          <div class="testimonial-meta">PCOS user</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-quote">I love the app because it made accountability easy - there wasn't so much pressure to do lots of work to log, and my goals get personalized and adjustable to me. Knowing it was informed by hormonal changes helped me ease my expectations around how much my body fluctuates and actually made goal setting more sustainable.</p>
+          <div class="testimonial-name">Dani Chmiel</div>
+          <div class="testimonial-meta">Postpartum</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-quote">Afina taught me to love and understand my body, listen to its needs, and realize just how much I am capable of achieving</p>
+          <div class="testimonial-name">Heena Parikh</div>
+          <div class="testimonial-meta">Cycling user</div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars" aria-label="5 out of 5 stars">★★★★★</div>
+          <p class="testimonial-quote">Finally an app that connects my nutrition and my cycle. It's not just logging macros, it actually helps me understand why my body feels different week to week!</p>
+          <div class="testimonial-name">Sarah Bakhshi</div>
+          <div class="testimonial-meta">Cycling user</div>
+        </div>
+      </div>
+      <div class="testimonial-dots" id="testimonial-dots" role="tablist" aria-label="Testimonials"></div>
+    </div>
+  </section>
+
+  <!-- ── Section 8: Pricing / CTA ── -->
+  <section class="cta-section" id="pricing">
+    <div class="cta-inner">
+      <h2 class="cta-heading">Your first month is <em>on us</em></h2>
+      <p class="cta-sub">Try everything free for 30 days &mdash; no credit card, no commitment. Then keep going with monthly or annual.</p>
+      <a href="https://apps.apple.com/app/id6761498641" class="cta-btn btn-swap"><span class="btn-label"><span class="btn-text" data-label="Start your free month">Start your free month</span></span></a>
+
+      <div class="pricing-cards">
+
+        <!-- Annual -->
+        <a class="pricing-card featured" href="https://apps.apple.com/app/id6761498641">
+          <div class="pricing-badge">Best value</div>
+          <div class="pricing-period">Annual &ndash; billed at $69.99 USD/yr</div>
+          <div class="pricing-price-block">
+            <span class="pricing-free">First 30 days free</span>
+            <span class="pricing-amount">then $5.83 USD/month</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Personal AI coaching</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Phase-synced daily targets</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Conversational food logging</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Apple health and Oura ring integrations</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Personalized daily notifications</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly reports and projections</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Access to all life stages</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>PCOS, thyroid and endo support</li>
+          </ul>
+        </a>
+
+        <!-- Monthly -->
+        <a class="pricing-card" href="https://apps.apple.com/app/id6761498641">
+          <div class="pricing-period">Monthly</div>
+          <div class="pricing-price-block">
+            <span class="pricing-free">First 30 days free</span>
+            <span class="pricing-amount">then $14.99 USD/month</span>
+          </div>
+          <ul class="pricing-features">
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Personal AI coaching</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Phase-synced daily targets</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Conversational food logging</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Apple health and Oura ring integrations</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Personalized daily notifications</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Weekly reports and projections</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Access to all life stages</li>
+            <li><svg class="pricing-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#2D2A33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>PCOS, thyroid and endo support</li>
+          </ul>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <p class="site-footer-copy">&copy; 2026 Afina. All rights reserved.</p>
+      <nav class="site-footer-links">
+        <a href="legal/privacy-policy.html">Privacy policy</a>
+        <a href="legal/terms-of-service.html">Terms of service</a>
+        <a href="/contact-us">Contact us</a>
+      </nav>
+    </div>
+  </footer>
+
+<script>
+
+  // ── Scroll reveals (micro-animations) ──
+  (() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const targets = document.querySelectorAll(
+      '.work-heading, .work-sub, .work-item, .ask-heading, .ask-sub, ' +
+      '.privacy-copy, .privacy-visual, .phases-heading, .phases-list li, ' +
+      '.testimonials-heading, .testimonial-card, .cta-heading, .cta-sub, .pricing-card'
+    );
+    const groups = new Map();
+    targets.forEach((el) => {
+      el.classList.add('reveal');
+      const parent = el.parentElement;
+      const n = groups.get(parent) || 0;
+      el.style.setProperty('--reveal-delay', (Math.min(n, 5) * 90) + 'ms');
+      groups.set(parent, n + 1);
+    });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('revealed'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    targets.forEach((el) => io.observe(el));
+  })();
+
+  // ── Hero image + bubble rotation ──
+  const heroSlides = document.querySelectorAll('.hero-slide');
+  const heroBubble = document.getElementById('hero-bubble');
+  const heroBubbleWords = document.querySelectorAll('.hero-bubble-word');
+  const heroData = [
+    { word: 'moment', color: '#E1A0AD' },
+    { word: 'age',    color: '#9B7FB6' },
+    { word: 'stage',  color: '#A9BC94' }
+  ];
+  let heroIndex = 0;
+  setInterval(() => {
+    heroIndex = (heroIndex + 1) % heroData.length;
+    heroSlides.forEach((img, i) => img.classList.toggle('active', i === heroIndex));
+    heroBubble.style.background = heroData[heroIndex].color;
+    heroBubbleWords.forEach((el, i) => el.classList.toggle('active', i === heroIndex));
+  }, 4000);
+
+  // ── Testimonials carousel dots ──
+  const tTrack = document.querySelector('.testimonials-cards');
+  const tDotsWrap = document.getElementById('testimonial-dots');
+  if (tTrack && tDotsWrap) {
+    const tCards = [...tTrack.children];
+
+    function tGap() { return parseFloat(getComputedStyle(tTrack).columnGap) || 0; }
+    function tStep() { return tCards[0].offsetWidth + tGap(); }
+    function tPerView() { return Math.max(1, Math.round((tTrack.clientWidth + tGap()) / tStep())); }
+    // one dot per distinct scroll position (cards - visible + 1)
+    function tPositions() { return Math.max(1, tCards.length - tPerView() + 1); }
+
+    function tCurrent() {
+      return Math.min(tPositions() - 1, Math.max(0, Math.round(tTrack.scrollLeft / tStep())));
+    }
+
+    function tBuildDots() {
+      tDotsWrap.innerHTML = '';
+      const count = tPositions();
+      const cur = tCurrent();
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'testimonial-dot' + (i === cur ? ' active' : '');
+        dot.setAttribute('role', 'tab');
+        dot.setAttribute('aria-label', 'Testimonials position ' + (i + 1));
+        dot.addEventListener('click', () => {
+          tTrack.scrollTo({ left: tCards[i].offsetLeft - tTrack.offsetLeft, behavior: 'smooth' });
+        });
+        tDotsWrap.appendChild(dot);
+      }
+    }
+
+    let tRaf = null;
+    tTrack.addEventListener('scroll', () => {
+      if (tRaf) return;
+      tRaf = requestAnimationFrame(() => {
+        tRaf = null;
+        const cur = tCurrent();
+        [...tDotsWrap.children].forEach((d, i) => d.classList.toggle('active', i === cur));
+      });
+    });
+    window.addEventListener('resize', tBuildDots);
+    tBuildDots();
+  }
+
+  // ── Ask anything typing animation ──
+  const tabData = [
+    {
+      prompt: 'I feel hungry but I just ate',
+      title: 'Why you\'re hungry',
+      body: 'Your progesterone is rising, which boosts your metabolism and naturally burns more calories. Your hunger is real, not a lack of willpower!',
+      subtitle: 'A few things that can help in this phase',
+      bullets: [
+        '<strong>Protein + Fat combo:</strong> Nuts, eggs, or Greek yogurt keep you full longer than carbs.',
+        '<strong>Water first:</strong> Sometimes rising progesterone can blur the hunger/thirst signal. Have a big glass and wait 10 min',
+        '<strong>Volume eating:</strong> Try eating raw veggies, cucumbers, berries. High volume, low calories can satisfy the desire to chew'
+      ]
+    },
+    {
+      prompt: "Here's my lunch",
+      thumb: 'assets/Lunch.png',
+      type: 'table',
+      body: 'This looks like a kale salad with a pan-seared chicken thigh, skin-on. Assuming restaurant-style portion, cooked in oil.',
+      rows: [
+        { name: 'Kale salad with lemon, olive oil, pumpkin seeds, breadcrumbs and parmesan', serving: '~1.5 cups', cal: '320 cal', protein: '14g protein' },
+        { name: 'Pan-seared chicken thigh', serving: '~6oz, skin-on', cal: '340 cal', protein: '28g protein' },
+      ],
+      total: { cal: '660 cal', protein: '42g protein' }
+    },
+    {
+      prompt: 'Change my exercises',
+      type: 'exercises',
+      body: "I'll swap out your exercises for something more dynamic. Let me know if you want something specific.",
+      sections: [
+        {
+          label: 'Warm-up',
+          exercises: [
+            { name: 'Jumping jacks', meta: ['X reps', 'X sets', 'Body weight'] },
+          ]
+        },
+        {
+          label: 'Main',
+          exercises: [
+            { name: 'Goblet Squat', meta: ['3 sets', '15 reps', 'Heavy weight'] },
+            { name: 'Calf Raises', meta: ['3 sets', '15 reps', 'Moderate weight'] },
+            { name: 'Plank', meta: ['30 seconds', 'Bodyweight'] },
+            { name: 'Bulgarian Split Squat', meta: ['3 sets', '10 reps', 'Moderate weight'] },
+          ]
+        },
+        {
+          label: 'Cool down',
+          exercises: [
+            { name: 'Static Stretching', meta: ['5 min', 'Bodyweight'] },
+          ]
+        }
+      ]
+    }
+  ];
+
+  let askTyping = null;
+  let thinkingInterval = null;
+
+  function typeText(el, text, speed, onDone) {
+    el.textContent = '';
+    let i = 0;
+    function tick() {
+      if (i < text.length) {
+        el.textContent += text[i++];
+        askTyping = setTimeout(tick, speed);
+      } else if (onDone) {
+        onDone();
+      }
+    }
+    tick();
+  }
+
+  function runAskAnimation(tabIndex) {
+    if (askTyping) clearTimeout(askTyping);
+    if (thinkingInterval) clearInterval(thinkingInterval);
+    const data = tabData[tabIndex];
+
+    const promptEl      = document.getElementById('ask-prompt');
+    const thumbEl       = document.getElementById('ask-prompt-thumb');
+    const thinkingEl    = document.getElementById('ask-thinking');
+    const thinkIconEl   = document.getElementById('ask-thinking-icon');
+    const thinkLabelEl  = document.getElementById('ask-thinking-label');
+    const responseEl    = document.getElementById('ask-response');
+    const titleEl       = document.getElementById('ask-response-title');
+    const bodyEl        = document.getElementById('ask-response-body');
+    const subtitleEl    = document.getElementById('ask-response-subtitle');
+    const listEl        = document.getElementById('ask-response-list');
+
+    // Reset everything
+    promptEl.textContent = '';
+    titleEl.textContent  = '';
+    bodyEl.textContent   = '';
+    subtitleEl.textContent = '';
+    subtitleEl.classList.remove('visible');
+    listEl.innerHTML = '';
+    thinkingEl.classList.remove('visible');
+    thinkIconEl.classList.remove('spinning');
+    responseEl.classList.remove('visible');
+    // Remove any old dynamic content
+    const oldTable = responseEl.querySelector('.ask-food-table');
+    if (oldTable) oldTable.remove();
+    const oldImg = responseEl.querySelector('.ask-response-image');
+    if (oldImg) oldImg.remove();
+    const oldExercises = responseEl.querySelector('.ask-exercise-section');
+    if (oldExercises) oldExercises.remove();
+
+    // Handle thumbnail
+    if (data.thumb) {
+      thumbEl.src = data.thumb;
+      thumbEl.style.display = 'block';
+    } else {
+      thumbEl.style.display = 'none';
+    }
+
+    // Step 1: type the prompt
+    typeText(promptEl, data.prompt, 42, () => {
+
+      // Step 2: show thinking indicator
+      askTyping = setTimeout(() => {
+        thinkingEl.classList.add('visible');
+        thinkIconEl.classList.add('spinning');
+        let dots = 0;
+        const dotLabels = ['Thinking', 'Thinking.', 'Thinking..', 'Thinking...'];
+        thinkingInterval = setInterval(() => {
+          dots = (dots + 1) % dotLabels.length;
+          thinkLabelEl.textContent = dotLabels[dots];
+        }, 380);
+
+        // Step 3: after thinking, fade in response card and type content
+        askTyping = setTimeout(() => {
+          clearInterval(thinkingInterval);
+          thinkingEl.classList.remove('visible');
+          thinkIconEl.classList.remove('spinning');
+
+          askTyping = setTimeout(() => {
+            responseEl.classList.add('visible');
+
+            // Type content
+            askTyping = setTimeout(() => {
+              if (data.type === 'exercises') {
+                typeText(bodyEl, data.body, 9, () => {
+                  const wrap = document.createElement('div');
+                  wrap.className = 'ask-exercise-section';
+                  data.sections.forEach(sec => {
+                    wrap.innerHTML += `<div class="ask-exercise-section-label">${sec.label}</div>` +
+                      sec.exercises.map(ex => `
+                        <div class="ask-exercise-card">
+                          <div class="ask-exercise-accent"></div>
+                          <div class="ask-exercise-content">
+                            <div>
+                              <div class="ask-exercise-name">${ex.name}</div>
+                              <div class="ask-exercise-meta">${ex.meta.map((p,i) => i===0 ? p : `<span> · </span>${p}`).join('')}</div>
+                            </div>
+                            <div class="ask-exercise-check"></div>
+                          </div>
+                        </div>`).join('');
+                  });
+                  responseEl.appendChild(wrap);
+                  requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('visible')));
+                });
+              } else if (data.type === 'table') {
+                typeText(bodyEl, data.body, 9, () => {
+                  // Build and fade in table
+                  const table = document.createElement('div');
+                  table.className = 'ask-food-table';
+                  data.rows.forEach(row => {
+                    table.innerHTML += `<div class="ask-food-row">
+                      <div><div class="ask-food-name">${row.name}</div><div class="ask-food-serving">${row.serving}</div></div>
+                      <div class="ask-food-macros"><div class="ask-food-cal">${row.cal}</div><div class="ask-food-protein">${row.protein}</div></div>
+                    </div>`;
+                  });
+                  table.innerHTML += `<div class="ask-food-row total">
+                    <div class="ask-food-name">Total</div>
+                    <div class="ask-food-macros"><div class="ask-food-cal">${data.total.cal}</div><div class="ask-food-protein">${data.total.protein}</div></div>
+                  </div>`;
+                  responseEl.appendChild(table);
+                  requestAnimationFrame(() => requestAnimationFrame(() => table.classList.add('visible')));
+                });
+              } else {
+                typeText(titleEl, data.title, 18, () => {
+                  typeText(bodyEl, data.body, 9, () => {
+                    subtitleEl.textContent = data.subtitle;
+                    data.bullets.forEach(b => {
+                      const li = document.createElement('li');
+                      li.innerHTML = b;
+                      listEl.appendChild(li);
+                    });
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                      subtitleEl.classList.add('visible');
+                      listEl.querySelectorAll('li').forEach(li => li.classList.add('visible'));
+                    }));
+                  });
+                });
+              }
+            }, 200);
+          }, 300);
+        }, 900);
+      }, 300);
+    });
+  }
+
+  // Mobile menu toggle
+  document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+    document.getElementById('mobile-nav').classList.toggle('open');
+  });
+  document.querySelectorAll('.mobile-nav-link').forEach(link => {
+    link.addEventListener('click', () => document.getElementById('mobile-nav').classList.remove('open'));
+  });
+
+  // Sliding tab indicator
+  const indicator = document.getElementById('ask-tab-indicator');
+  const tabsEl    = document.getElementById('ask-tabs');
+
+  function moveIndicator(btn) {
+    const containerRect = tabsEl.getBoundingClientRect();
+    const btnRect       = btn.getBoundingClientRect();
+    indicator.style.left   = (btnRect.left - containerRect.left) + 'px';
+    indicator.style.top    = (btnRect.top  - containerRect.top)  + 'px';
+    indicator.style.width  = btnRect.width  + 'px';
+    indicator.style.height = btnRect.height + 'px';
+  }
+
+  // Position indicator immediately (no transition) on first paint
+  const firstTab = document.querySelector('.ask-tab.active');
+  indicator.style.transition = 'none';
+  // Wait one frame so layout is ready
+  requestAnimationFrame(() => {
+    moveIndicator(firstTab);
+    requestAnimationFrame(() => {
+      indicator.style.transition = '';
+    });
+  });
+
+  // Tab switching
+  let askTabIndex = 0;
+  let askTabTimer = null;
+
+  function switchTab(i, userInitiated = false) {
+    if (userInitiated) {
+      clearInterval(askTabTimer);
+      askTabTimer = null;
+    }
+    askTabIndex = i;
+    const tabs = document.querySelectorAll('.ask-tab');
+    tabs.forEach(b => b.classList.remove('active'));
+    tabs[i].classList.add('active');
+    moveIndicator(tabs[i]);
+    runAskAnimation(i);
+  }
+
+  document.querySelectorAll('.ask-tab').forEach((btn, i) => {
+    btn.addEventListener('click', () => switchTab(i, true));
+  });
+
+  function startTabRotation() {
+    askTabTimer = setInterval(() => {
+      askTabIndex = (askTabIndex + 1) % 3;
+      switchTab(askTabIndex);
+    }, 7000);
+  }
+
+  // Start on load when section scrolls into view
+  const askIcon = document.querySelector('.ask-icon');
+  const askObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      askIcon.classList.add('spin');
+      askIcon.addEventListener('animationend', () => askIcon.classList.remove('spin'), { once: true });
+      setTimeout(() => { runAskAnimation(0); startTabRotation(); }, 600);
+      askObserver.disconnect();
+    }
+  }, { threshold: 0.3 });
+  askObserver.observe(document.querySelector('.ask-section'));
+</script>
+</body>
+</html>

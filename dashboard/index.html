@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afina — Alpha Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --sage: #5F8A6D;
+    --sage-light: #7BA589;
+    --sage-dark: #4A6F56;
+    --cream: #FDF6EE;
+    --white: #FFFFFF;
+    --card-bg: #FFFFFF;
+    --text-primary: #1A2B22;
+    --text-secondary: #5E6E64;
+    --text-muted: #8A9B90;
+    --border: #E2E8E4;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-hover: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+    --bg: #F4F1EB;
+    --error: #D9534F;
+    --error-bg: #FDF0F0;
+    --success: #5F8A6D;
+    --success-bg: #EFF6F1;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --warm: #C48A7A;
+    --warm-bg: #FAF0ED;
+  }
+  [data-theme="dark"] {
+    --cream: #1A1F1C; --white: #222822; --card-bg: #262C28;
+    --text-primary: #E8EDE9; --text-secondary: #A0AEA4; --text-muted: #6B7A70;
+    --border: #3A423C; --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.15);
+    --shadow-hover: 0 2px 8px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.2);
+    --bg: #141814; --error-bg: #2A1A1A; --success-bg: #1A2A1E; --warm-bg: #2A2218;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg); color: var(--text-primary); line-height: 1.5; min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* API Banner */
+  .api-banner {
+    background: var(--card-bg); border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+  }
+  .api-banner .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; transition: background 0.3s; }
+  .api-banner .status-dot.connected { background: #4CAF50; box-shadow: 0 0 6px rgba(76,175,80,0.5); }
+  .api-banner .status-dot.error { background: var(--error); box-shadow: 0 0 6px rgba(217,83,79,0.5); }
+  .api-banner label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+  .api-banner input {
+    flex: 1; min-width: 200px; max-width: 400px; padding: 8px 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px;
+    background: var(--bg); color: var(--text-primary); outline: none; font-family: monospace;
+  }
+  .api-banner input:focus { border-color: var(--sage); }
+  .api-banner input::placeholder { color: var(--text-muted); }
+
+  .btn { padding: 8px 20px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-primary { background: var(--sage); color: white; }
+  .btn-primary:hover { background: var(--sage-dark); transform: translateY(-1px); }
+  .btn-sm { padding: 5px 14px; font-size: 12px; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+  .btn-outline:hover { border-color: var(--sage); color: var(--sage); }
+  .btn-outline.active { background: var(--sage); color: white; border-color: var(--sage); }
+  .api-status { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+  /* Header */
+  .header { padding: 32px 24px 24px; max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+  .header h1 { font-size: 28px; font-weight: 700; color: var(--sage); letter-spacing: -0.5px; }
+  .header .subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .refresh-info { font-size: 12px; color: var(--text-muted); }
+  .theme-toggle { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s; }
+  .theme-toggle:hover { border-color: var(--sage); }
+
+  /* Navigation tabs */
+  .nav-tabs { max-width: 1400px; margin: 0 auto; padding: 0 24px 16px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-tab { padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-secondary); transition: all 0.2s; }
+  .nav-tab:hover { border-color: var(--sage); color: var(--sage); }
+  .nav-tab.active { background: var(--sage); color: white; border-color: var(--sage); }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 24px 48px; }
+
+  /* Page sections */
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+
+  /* Stat Cards */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--card-bg); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); transition: all 0.3s; }
+  .stat-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .stat-card .stat-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 16px; }
+  .stat-card .stat-icon.green { background: var(--success-bg); }
+  .stat-card .stat-icon.blue { background: #EEF4FF; }
+  .stat-card .stat-icon.purple { background: #F3EEFF; }
+  .stat-card .stat-icon.orange { background: #FFF4EE; }
+  .stat-card .stat-icon.warm { background: var(--warm-bg); }
+  [data-theme="dark"] .stat-card .stat-icon.blue { background: #1A2230; }
+  [data-theme="dark"] .stat-card .stat-icon.purple { background: #221A30; }
+  [data-theme="dark"] .stat-card .stat-icon.orange { background: #2A2218; }
+  .stat-card .stat-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; }
+  .stat-card .stat-value { font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1.1; }
+  .stat-card .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  /* Cards */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  .grid-full { margin-bottom: 24px; }
+  .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: all 0.3s; }
+  .card:hover { box-shadow: var(--shadow-hover); }
+  .card-header { padding: 20px 24px 0; display: flex; justify-content: space-between; align-items: center; }
+  .card-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+  .card-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--success-bg); color: var(--sage); font-weight: 600; }
+  .card-body { padding: 20px 24px 24px; }
+
+  /* User Directory Table */
+  .user-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .user-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); color: var(--text-secondary); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .user-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+  .user-table tr:last-child td { border-bottom: none; }
+  .user-table tr:hover td { background: var(--bg); cursor: pointer; }
+  .user-table .user-name { font-weight: 600; color: var(--sage); }
+  .user-table .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .badge-goal { background: var(--success-bg); color: var(--sage); }
+  .badge-stage { background: #EEF4FF; color: #4A7AB5; }
+  .badge-bf { background: var(--warm-bg); color: var(--warm); }
+  .badge-dev { background: #FFF3CD; color: #856404; }
+  .badge-hidden { background: var(--error-bg); color: var(--error); }
+  .user-table .user-actions { display: flex; gap: 4px; }
+  .user-table .btn-action { padding: 2px 8px; font-size: 10px; font-weight: 600; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .user-table .btn-action:hover { border-color: var(--sage); color: var(--sage); }
+  .user-table .btn-action.btn-danger:hover { border-color: var(--error); color: var(--error); }
+
+  /* User Detail Panel */
+  .user-detail-panel { display: none; }
+  .user-detail-panel.active { display: block; }
+  .user-detail-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .user-detail-header .back-btn { padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--card-bg); color: var(--text-secondary); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+  .user-detail-header .back-btn:hover { border-color: var(--sage); color: var(--sage); }
+  .user-detail-header h2 { font-size: 20px; font-weight: 700; }
+  .user-detail-header .user-meta { font-size: 13px; color: var(--text-secondary); }
+
+  .user-stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .user-stat-mini { background: var(--bg); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .user-stat-mini .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .user-stat-mini .val { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+
+  /* Events Table */
+  .events-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .events-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); color: var(--text-secondary); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .events-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-primary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .events-table tr:last-child td { border-bottom: none; }
+  .events-table tr:hover td { background: var(--bg); }
+  .event-name-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; background: var(--success-bg); color: var(--sage); font-weight: 600; font-size: 12px; }
+  .event-time { color: var(--text-muted); font-size: 12px; }
+
+  /* Funnel */
+  .funnel-step { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+  .funnel-step:last-child { margin-bottom: 0; }
+  .funnel-label { width: 160px; font-size: 13px; color: var(--text-secondary); text-align: right; flex-shrink: 0; }
+  .funnel-bar-container { flex: 1; height: 36px; background: var(--bg); border-radius: 8px; overflow: hidden; position: relative; }
+  .funnel-bar { height: 100%; border-radius: 8px; transition: width 1s ease-out; display: flex; align-items: center; padding-left: 12px; font-size: 13px; font-weight: 600; color: white; min-width: 50px; }
+  .funnel-dropoff { width: 60px; text-align: right; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+
+  /* Chart */
+  .chart-container { position: relative; width: 100%; max-height: 300px; }
+
+  /* Retention heatmap */
+  .retention-grid { display: grid; gap: 2px; }
+  .retention-cell { width: 100%; aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; transition: transform 0.1s; }
+  .retention-cell:hover { transform: scale(1.1); z-index: 1; }
+  .retention-header { font-size: 10px; color: var(--text-muted); text-align: center; padding: 4px; font-weight: 600; }
+
+  /* Loading & Error */
+  .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--text-muted); font-size: 14px; gap: 10px; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--sage); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { padding: 16px 20px; background: var(--error-bg); border-radius: var(--radius-sm); color: var(--error); font-size: 13px; text-align: center; margin: 12px 0; }
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .live-dot { display: inline-block; width: 6px; height: 6px; background: #4CAF50; border-radius: 50%; margin-right: 6px; animation: pulse 2s ease-in-out infinite; }
+
+  /* Search */
+  .search-bar { padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; background: var(--bg); color: var(--text-primary); outline: none; width: 260px; }
+  .search-bar:focus { border-color: var(--sage); }
+
+  /* Responsive */
+  @media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .stats-row { grid-template-columns: 1fr; } .header h1 { font-size: 22px; } .api-banner { padding: 10px 16px; } .api-banner input { min-width: 150px; } .container { padding: 0 16px 32px; } .search-bar { width: 100%; } .nav-tabs { padding: 0 16px 12px; } }
+</style>
+</head>
+<body>
+
+<!-- API Key Banner -->
+<div class="api-banner">
+  <div class="status-dot" id="statusDot"></div>
+  <label for="apiKeyInput">PostHog Personal API Key</label>
+  <input type="password" id="apiKeyInput" placeholder="phx_xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+  <button class="btn btn-primary" id="connectBtn" onclick="connectAPI()">Connect</button>
+  <span class="api-status" id="apiStatus">Not connected</span>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>&#127793; Afina — Alpha Dashboard</h1>
+    <div class="subtitle" id="dateSubtitle"></div>
+  </div>
+  <div class="header-right">
+    <span class="refresh-info" id="refreshInfo">Auto-refresh: 60s</span>
+    <button class="btn btn-sm btn-outline" onclick="loadAllData()">&#8635; Refresh</button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn">&#9790;</button>
+  </div>
+</div>
+
+<!-- Environment Filter -->
+<div style="max-width:1400px; margin:0 auto; padding:0 24px 8px; display:flex; align-items:center; gap:8px;">
+  <span style="font-size:12px; color:var(--text-muted); font-weight:600;">Environment:</span>
+  <button class="btn btn-sm btn-outline" id="envAll" onclick="setEnvFilter('all')">All</button>
+  <button class="btn btn-sm btn-outline active" id="envProd" onclick="setEnvFilter('production')">&#127919; Production Only</button>
+  <button class="btn btn-sm btn-outline" id="envDev" onclick="setEnvFilter('development')">&#128736; Dev Only</button>
+  <span style="font-size:11px; color:var(--text-muted); margin-left:8px;" id="envNote">Showing only TestFlight / production builds</span>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('overview')">Overview</div>
+  <div class="nav-tab" onclick="switchTab('users')">&#128100; Users</div>
+  <div class="nav-tab" onclick="switchTab('retention')">&#128200; Retention</div>
+  <div class="nav-tab" onclick="switchTab('features')">&#9889; Features</div>
+  <div class="nav-tab" onclick="switchTab('coach')">&#128172; Coach</div>
+  <div class="nav-tab" onclick="switchTab('events')">&#128203; Events</div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+
+  <!-- ===================== OVERVIEW TAB ===================== -->
+  <div class="page-section active" id="tab-overview">
+    <!-- Top Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon green">&#128100;</div>
+        <div class="stat-label">Unique Users</div>
+        <div class="stat-value" id="statTotalUsers">--</div>
+        <div class="stat-sub" id="statTotalUsersSub">By distinct_id</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">&#9889;</div>
+        <div class="stat-label">Active Today</div>
+        <div class="stat-value" id="statActiveToday">--</div>
+        <div class="stat-sub">Events today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">&#127919;</div>
+        <div class="stat-label">Onboarding Rate</div>
+        <div class="stat-value" id="statOnboardingRate">--</div>
+        <div class="stat-sub" id="statOnbSub">Completed / Started</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">&#128172;</div>
+        <div class="stat-label">Coach Msgs / User</div>
+        <div class="stat-value" id="statAvgCoach">--</div>
+        <div class="stat-sub" id="statCoachSub">Average per user</div>
+      </div>
+    </div>
+
+    <!-- User Attribute Breakdown -->
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Goal Distribution</span></div>
+        <div class="card-body">
+          <div class="chart-container" style="max-height:240px; display:flex; justify-content:center;">
+            <canvas id="goalChart"></canvas>
+          </div>
+          <div id="goalLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Life Stage</span></div>
+        <div class="card-body">
+          <div class="chart-container" style="max-height:240px; display:flex; justify-content:center;">
+            <canvas id="lifeStageChart"></canvas>
+          </div>
+          <div id="lifeStageLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Breastfeeding</span></div>
+        <div class="card-body">
+          <div class="chart-container" style="max-height:240px; display:flex; justify-content:center;">
+            <canvas id="bfChart"></canvas>
+          </div>
+          <div id="bfLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding Funnel -->
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Onboarding Funnel</span>
+          <span class="card-badge">All time</span>
+        </div>
+        <div class="card-body" id="funnelContainer">
+          <div class="loading"><div class="spinner"></div>Loading funnel data...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Engagement -->
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Daily Active Users</span>
+          <span class="card-badge">Last 14 days</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="engagementChart"></canvas></div>
+          <div id="engagementLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== USERS TAB ===================== -->
+  <div class="page-section" id="tab-users">
+    <div id="userListView">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <h2 style="font-size:20px; font-weight:700;">User Directory</h2>
+        <input class="search-bar" type="text" id="userSearch" placeholder="Search by name, email, or ID..." oninput="filterUsers()">
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="table-wrap" id="userTableContainer">
+            <div class="loading"><div class="spinner"></div>Loading users...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="userDetailView" class="user-detail-panel">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+
+  <!-- ===================== RETENTION TAB ===================== -->
+  <div class="page-section" id="tab-retention">
+    <div class="stats-row" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="stat-card">
+        <div class="stat-icon green">&#128197;</div>
+        <div class="stat-label">Daily Return Rate</div>
+        <div class="stat-value" id="retDaily">--</div>
+        <div class="stat-sub">% users returning next day</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">&#128198;</div>
+        <div class="stat-label">Weekly Return Rate</div>
+        <div class="stat-value" id="retWeekly">--</div>
+        <div class="stat-sub">% users active 2+ days/week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">&#128467;</div>
+        <div class="stat-label">30-Day Retention</div>
+        <div class="stat-value" id="retMonthly">--</div>
+        <div class="stat-sub">% active in last 30 days vs all time</div>
+      </div>
+    </div>
+
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Daily Active Users Trend</span>
+          <span class="card-badge">Last 30 days</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="retentionChart"></canvas></div>
+          <div id="retentionLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">User Activity Heatmap</span>
+          <span class="card-badge">Last 14 days</span>
+        </div>
+        <div class="card-body" id="heatmapContainer">
+          <div class="loading"><div class="spinner"></div>Loading heatmap...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== FEATURES TAB ===================== -->
+  <div class="page-section" id="tab-features">
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Feature Adoption</span>
+          <span class="card-badge">% of users who have used each feature</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="max-height:400px;"><canvas id="featureAdoptionChart"></canvas></div>
+          <div id="featureAdoptionLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Feature Usage (Total Events)</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="max-height:350px;"><canvas id="featureVolumeChart"></canvas></div>
+          <div id="featureVolumeLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Feature Usage Over Time</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="featureTimeChart"></canvas></div>
+          <div id="featureTimeLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== COACH TAB ===================== -->
+  <div class="page-section" id="tab-coach">
+    <div class="stats-row" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="stat-card">
+        <div class="stat-icon orange">&#128172;</div>
+        <div class="stat-label">Total Messages</div>
+        <div class="stat-value" id="coachTotal">--</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">&#128100;</div>
+        <div class="stat-label">Users Using Coach</div>
+        <div class="stat-value" id="coachUsers">--</div>
+        <div class="stat-sub" id="coachUsersSub">of total users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">&#128200;</div>
+        <div class="stat-label">Avg Msgs / User</div>
+        <div class="stat-value" id="coachAvg">--</div>
+        <div class="stat-sub">Per active coach user</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">&#128197;</div>
+        <div class="stat-label">Avg Msgs / Day</div>
+        <div class="stat-value" id="coachDaily">--</div>
+        <div class="stat-sub">Across all users</div>
+      </div>
+    </div>
+
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Coach Messages Over Time</span>
+          <span class="card-badge">Last 30 days</span>
+        </div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="coachTimeChart"></canvas></div>
+          <div id="coachTimeLoading" class="loading"><div class="spinner"></div>Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-full">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Top Coach Users</span>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap" id="coachLeaderboard">
+            <div class="loading"><div class="spinner"></div>Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== EVENTS TAB ===================== -->
+  <div class="page-section" id="tab-events">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+      <h2 style="font-size:20px; font-weight:700;"><span class="live-dot"></span>Live Event Stream</h2>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <input class="search-bar" type="text" id="eventSearch" placeholder="Filter events..." oninput="filterEvents()" style="width:200px;">
+        <select id="eventUserFilter" onchange="filterEvents()" style="padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; background:var(--bg); color:var(--text-primary);">
+          <option value="">All users</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="table-wrap" id="eventsTableContainer">
+          <div class="loading"><div class="spinner"></div>Loading events...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========== CONFIG ==========
+const POSTHOG_HOST = 'https://app.posthog.com';
+const QUERY_URL = `${POSTHOG_HOST}/api/projects/@current/query/`;
+
+let API_KEY = localStorage.getItem('ph_api_key') || '';
+let refreshInterval = null;
+let chartInstances = {};
+let allUsers = [];
+let allEvents = [];
+let envFilter = 'production'; // 'all' | 'production' | 'development'
+
+// Dashboard timezone — all HogQL date functions use this so daily boundaries
+// align with the user's local day, not UTC.
+const DASHBOARD_TZ = 'America/Los_Angeles';
+
+// Person IDs forced to count as "real users" even without onboarding_completed.
+// Populated automatically below (e.g. Neha) or manually via forceRealPersons.
+let forceRealPersons = JSON.parse(localStorage.getItem('ph_force_real_persons') || '[]');
+
+// Person-level filtering — stored in localStorage so it persists
+let hiddenPersons = JSON.parse(localStorage.getItem('ph_hidden_persons') || '[]');
+let devPersons = JSON.parse(localStorage.getItem('ph_dev_persons') || '[]');
+let allRawUsers = []; // unfiltered user list for management
+
+let nameOverrides = JSON.parse(localStorage.getItem('ph_name_overrides') || '{}');
+
+function savePersonLists() {
+  localStorage.setItem('ph_hidden_persons', JSON.stringify(hiddenPersons));
+  localStorage.setItem('ph_dev_persons', JSON.stringify(devPersons));
+  localStorage.setItem('ph_name_overrides', JSON.stringify(nameOverrides));
+  localStorage.setItem('ph_force_real_persons', JSON.stringify(forceRealPersons));
+}
+
+function getPersonExclusionIds() {
+  const ids = [...hiddenPersons];
+  if (envFilter === 'production') ids.push(...devPersons);
+  return [...new Set(ids)];
+}
+
+// Feature event mapping
+const FEATURE_EVENTS = {
+  'Meal Logging': ['meal_logged'],
+  'Coach Chat': ['coach_message_sent'],
+  'Weight Logging': ['weight_logged'],
+  'Feeding Tracker': ['feeding_logged'],
+  'Period Logging': ['period_logged', 'period_dates_edited'],
+  'Hydration': ['quick_action_used'],
+  'Insight Cards': ['insight_card_tapped'],
+  'Phase Detail': ['phase_detail_opened'],
+  'Day Navigation': ['day_navigated'],
+  'Habits': ['habit_completed'],
+  'Fuel Tab': ['fuel_tab_viewed', 'fuel_score_info_opened', 'fuel_log_meal_tapped', 'fuel_segment_switched'],
+  'Move Tab': ['move_tab_viewed', 'workout_completed', 'move_segment_switched'],
+  'Move Onboarding': ['move_onboarding_completed'],
+};
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  document.getElementById('dateSubtitle').textContent =
+    today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) +
+    ' \u00B7 Alpha Testing';
+
+  if (localStorage.getItem('ph_theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('themeBtn').innerHTML = '&#9788;';
+  }
+
+  if (API_KEY) {
+    document.getElementById('apiKeyInput').value = API_KEY;
+    connectAPI();
+  }
+});
+
+// ========== THEME ==========
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').innerHTML = isDark ? '&#9790;' : '&#9788;';
+  localStorage.setItem('ph_theme', isDark ? 'light' : 'dark');
+  if (API_KEY) loadAllData();
+}
+
+// ========== TAB NAVIGATION ==========
+function switchTab(tabName) {
+  document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  event.target.classList.add('active');
+
+  // Load tab-specific data
+  if (tabName === 'users') renderUserTable(); // re-render in case env filter changed
+  if (tabName === 'retention') loadRetentionData();
+  if (tabName === 'features') loadFeatureData();
+  if (tabName === 'coach') loadCoachData();
+  if (tabName === 'events') loadRecentEvents();
+}
+
+// ========== API CONNECTION ==========
+function connectAPI() {
+  const input = document.getElementById('apiKeyInput');
+  const key = input.value.trim();
+  if (!key) { showStatus('Please enter an API key', 'error'); return; }
+  API_KEY = key;
+  localStorage.setItem('ph_api_key', key);
+  showStatus('Connecting...', '');
+
+  posthogQuery({ kind: 'HogQLQuery', query: 'SELECT 1' })
+    .then(() => {
+      showStatus('Connected', 'connected');
+      loadAllData();
+      startAutoRefresh();
+    })
+    .catch(err => showStatus('Connection failed: ' + err.message, 'error'));
+}
+
+function showStatus(msg, state) {
+  document.getElementById('statusDot').className = 'status-dot' + (state ? ' ' + state : '');
+  document.getElementById('apiStatus').textContent = msg;
+}
+
+function startAutoRefresh() {
+  if (refreshInterval) clearInterval(refreshInterval);
+  refreshInterval = setInterval(() => { if (API_KEY) loadAllData(); }, 60000);
+}
+
+// ========== QUERY HELPER ==========
+
+// Inject a WHERE clause into a HogQL query that references the events table
+function injectEventsWhereClause(q, clause) {
+  if (/FROM\s+events\s+WHERE/i.test(q)) {
+    return q.replace(/FROM\s+events\s+WHERE/i, `FROM events WHERE ${clause} AND`);
+  } else if (/FROM\s+events\s+GROUP/i.test(q)) {
+    return q.replace(/FROM\s+events\s+GROUP/i, `FROM events WHERE ${clause} GROUP`);
+  } else if (/FROM\s+events\s+ORDER/i.test(q)) {
+    return q.replace(/FROM\s+events\s+ORDER/i, `FROM events WHERE ${clause} ORDER`);
+  } else if (/FROM\s+events\s+LIMIT/i.test(q)) {
+    return q.replace(/FROM\s+events\s+LIMIT/i, `FROM events WHERE ${clause} LIMIT`);
+  } else if (/FROM\s+events$/i.test(q.trim())) {
+    return q.trim() + ` WHERE ${clause}`;
+  }
+  return q;
+}
+
+async function posthogQuery(query, { skipPersonFilter = false, skipEnvFilter = false } = {}) {
+  if (query.kind === 'HogQLQuery') {
+    let q = query.query;
+
+    // 1. Environment filter
+    if (envFilter !== 'all' && !skipEnvFilter) {
+      const envClause = envFilter === 'production'
+        ? "(properties.environment = 'production' OR properties.environment IS NULL)"
+        : "properties.environment = 'development'";
+      q = injectEventsWhereClause(q, envClause);
+    }
+
+    // 2. Person exclusion (hidden users + dev users when in production mode)
+    if (!skipPersonFilter) {
+      const excludeIds = getPersonExclusionIds();
+      if (excludeIds.length > 0) {
+        const idList = excludeIds.map(id => `'${id}'`).join(',');
+        q = injectEventsWhereClause(q, `person.id NOT IN (${idList})`);
+      }
+    }
+
+    query = { ...query, query: q };
+  }
+
+  const res = await fetch(QUERY_URL, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HTTP ${res.status}: ${text.substring(0, 200)}`);
+  }
+  return res.json();
+}
+
+function extractValue(res) {
+  if (res?.results?.length > 0) {
+    const row = res.results[0];
+    return Array.isArray(row) ? row[0] : row;
+  }
+  return 0;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatLabel(str) {
+  if (!str) return 'Unknown';
+  return str.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function gridColor() { return isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'; }
+function textColor() { return isDark() ? '#A0AEA4' : '#5E6E64'; }
+
+// ========== ENVIRONMENT FILTER ==========
+function setEnvFilter(env) {
+  envFilter = env;
+  ['envAll', 'envProd', 'envDev'].forEach(id => document.getElementById(id).classList.remove('active'));
+  if (env === 'all') document.getElementById('envAll').classList.add('active');
+  if (env === 'production') document.getElementById('envProd').classList.add('active');
+  if (env === 'development') document.getElementById('envDev').classList.add('active');
+
+  const notes = { all: 'Showing all events (dev + production)', production: 'Showing only TestFlight / production builds', development: 'Showing only Expo dev builds' };
+  document.getElementById('envNote').textContent = notes[env];
+
+  if (API_KEY) loadAllData();
+}
+
+// ========== LOAD ALL DATA ==========
+async function loadAllData() {
+  // Load user directory first — auto-detects dev/hidden users so all
+  // subsequent queries properly exclude them via person.id filters
+  await loadUserDirectory();
+  loadTopStats();
+  loadGoalDistribution();
+  loadLifeStageDistribution();
+  loadBreastfeedingDistribution();
+  loadFunnel();
+  loadDailyEngagement();
+}
+
+// ========== TOP STATS ==========
+async function loadTopStats() {
+  try {
+    // Use person.id for unique user counts — PostHog merges multiple distinct_ids
+    // (from reinstalls, new builds) into one person after identify() is called
+    const [totalRes, activeTodayRes, onbStartedRes, onbCompletedRes, coachMsgsRes, coachUsersRes] = await Promise.all([
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'onboarding_completed'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT count(DISTINCT person.id) FROM events WHERE timestamp >= toDate(toTimeZone(now(), '${DASHBOARD_TZ}'))` }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'onboarding_started'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'onboarding_completed'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count() FROM events WHERE event = 'coach_message_sent'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'coach_message_sent'" }),
+    ]);
+
+    const total = extractValue(totalRes);
+    const activeToday = extractValue(activeTodayRes);
+    const started = extractValue(onbStartedRes);
+    const completed = extractValue(onbCompletedRes);
+    const coachMsgs = extractValue(coachMsgsRes);
+    const coachUsers = extractValue(coachUsersRes);
+
+    document.getElementById('statTotalUsers').textContent = total;
+    document.getElementById('statTotalUsersSub').textContent = `Merged persons (across installs)`;
+    document.getElementById('statActiveToday').textContent = activeToday;
+
+    const rate = started > 0 ? Math.round((completed / started) * 100) : 0;
+    document.getElementById('statOnboardingRate').textContent = rate + '%';
+    document.getElementById('statOnbSub').textContent = `${completed} / ${started} users`;
+
+    const avg = coachUsers > 0 ? (coachMsgs / coachUsers).toFixed(1) : '0';
+    document.getElementById('statAvgCoach').textContent = avg;
+    document.getElementById('statCoachSub').textContent = `${coachMsgs} total msgs`;
+  } catch (err) {
+    console.error('Top stats error:', err);
+  }
+}
+
+// ========== DISTRIBUTIONS ==========
+async function loadGoalDistribution() {
+  const loading = document.getElementById('goalLoading');
+  try {
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: "SELECT properties.goal AS goal, count(DISTINCT person.id) AS cnt FROM events WHERE event = 'onboarding_completed' AND properties.goal IS NOT NULL GROUP BY goal ORDER BY cnt DESC" });
+    loading.style.display = 'none';
+    renderDoughnut('goalChart', (res.results||[]).map(r => formatLabel(r[0])), (res.results||[]).map(r => r[1]),
+      ['#5F8A6D', '#E8A87C', '#A5C4D4', '#C4A5D4', '#D4C4A5']);
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+async function loadLifeStageDistribution() {
+  const loading = document.getElementById('lifeStageLoading');
+  try {
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: "SELECT properties.life_stage AS stage, count(DISTINCT person.id) AS cnt FROM events WHERE event = 'onboarding_completed' AND properties.life_stage IS NOT NULL GROUP BY stage ORDER BY cnt DESC" });
+    loading.style.display = 'none';
+    renderDoughnut('lifeStageChart', (res.results||[]).map(r => formatLabel(r[0])), (res.results||[]).map(r => r[1]),
+      ['#A5C4D4', '#5F8A6D', '#E8A87C', '#C4A5D4', '#D4C4A5']);
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+async function loadBreastfeedingDistribution() {
+  const loading = document.getElementById('bfLoading');
+  try {
+    // Count postpartum users with breastfeeding prop
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT
+        CASE WHEN properties.breastfeeding = 'true' OR properties.breastfeeding = true THEN 'Breastfeeding'
+             WHEN properties.life_stage = 'postpartum' THEN 'Postpartum (not BF)'
+             ELSE 'Not Postpartum' END AS category,
+        count(DISTINCT person.id) AS cnt
+        FROM events WHERE event = 'onboarding_completed'
+        GROUP BY category ORDER BY cnt DESC` });
+    loading.style.display = 'none';
+    renderDoughnut('bfChart', (res.results||[]).map(r => r[0]), (res.results||[]).map(r => r[1]),
+      ['#C48A7A', '#E8A87C', '#A5C4D4']);
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+function renderDoughnut(canvasId, labels, data, colors) {
+  if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  chartInstances[canvasId] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 12, font: { size: 12 }, color: textColor() } },
+      },
+      cutout: '60%',
+    },
+  });
+}
+
+// ========== FUNNEL ==========
+async function loadFunnel() {
+  const container = document.getElementById('funnelContainer');
+  try {
+    const [startedRes, completedRes] = await Promise.all([
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'onboarding_started'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'onboarding_completed'" }),
+    ]);
+
+    // Also get key actions to show conversion funnel
+    const [mealRes, coachRes, weightRes, feedRes] = await Promise.all([
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'meal_logged'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'coach_message_sent'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'weight_logged'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'feeding_logged'" }),
+    ]);
+
+    const started = extractValue(startedRes);
+    const completed = extractValue(completedRes);
+
+    const funnelData = [
+      { name: 'App Opened', count: started },
+      { name: 'Onboarding Completed', count: completed },
+      { name: 'First Meal Logged', count: extractValue(mealRes) },
+      { name: 'First Coach Message', count: extractValue(coachRes) },
+      { name: 'First Weight Log', count: extractValue(weightRes) },
+      { name: 'First Feeding Log', count: extractValue(feedRes) },
+    ];
+
+    const max = funnelData[0].count || 1;
+    const colors = ['#5F8A6D', '#6B9B79', '#78AC86', '#84BD93', '#91CDA0', '#9EDEAC'];
+
+    let html = '';
+    funnelData.forEach((step, i) => {
+      const pct = Math.max(5, Math.round((step.count / max) * 100));
+      const dropoff = i > 0 && funnelData[0].count > 0
+        ? Math.round((step.count / funnelData[0].count) * 100) + '%'
+        : '';
+      html += `<div class="funnel-step">
+        <div class="funnel-label">${escapeHtml(step.name)}</div>
+        <div class="funnel-bar-container">
+          <div class="funnel-bar" style="width:${pct}%; background:${colors[i]};">${step.count}</div>
+        </div>
+        <div class="funnel-dropoff">${dropoff}</div>
+      </div>`;
+    });
+
+    container.innerHTML = html || '<div class="empty-state"><div class="empty-icon">&#128202;</div><p>No funnel data yet</p></div>';
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">Failed to load funnel: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// ========== DAILY ENGAGEMENT ==========
+async function loadDailyEngagement() {
+  const loading = document.getElementById('engagementLoading');
+  try {
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT toDate(toTimeZone(timestamp, '${DASHBOARD_TZ}')) AS day, count(DISTINCT person.id) AS users FROM events WHERE timestamp >= toDate(toTimeZone(now(), '${DASHBOARD_TZ}')) - INTERVAL 14 DAY GROUP BY day ORDER BY day` });
+
+    loading.style.display = 'none';
+    const labels = (res.results||[]).map(r => { const d = new Date(r[0]); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); });
+    const data = (res.results||[]).map(r => r[1]);
+
+    if (chartInstances['engagementChart']) chartInstances['engagementChart'].destroy();
+    const ctx = document.getElementById('engagementChart').getContext('2d');
+    chartInstances['engagementChart'] = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Unique Users', data, borderColor: '#5F8A6D', backgroundColor: 'rgba(95,138,109,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#5F8A6D' }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor() }, grid: { color: gridColor() } }, x: { ticks: { color: textColor() }, grid: { display: false } } },
+        plugins: { legend: { display: false } },
+      },
+    });
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+// ========== USER DIRECTORY ==========
+async function loadUserDirectory() {
+  const container = document.getElementById('userTableContainer');
+  try {
+    // Skip ALL auto-filters here — we need the complete user list for management.
+    // Env + person filtering is applied client-side via allUsers / getPersonExclusionIds().
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT
+        person.id AS pid,
+        any(distinct_id) AS sample_did,
+        any(person.properties.name) AS pname,
+        any(person.properties.email) AS pemail,
+        any(person.properties.goal) AS pgoal,
+        any(person.properties.life_stage) AS pstage,
+        any(person.properties.lifeStage) AS pstage2,
+        any(person.properties.breastfeeding) AS pbf,
+        min(timestamp) AS first_seen,
+        max(timestamp) AS last_seen,
+        count() AS total_events,
+        count(DISTINCT distinct_id) AS device_count,
+        countIf(event = 'onboarding_completed') AS completed_onb
+        FROM events
+        GROUP BY pid
+        ORDER BY last_seen DESC
+        LIMIT 200` }, { skipPersonFilter: true, skipEnvFilter: true });
+
+    allRawUsers = (res.results||[]).map(r => ({
+      id: r[1],            // sample distinct_id (for detail queries)
+      personId: r[0],      // merged person id
+      name: nameOverrides[r[0]] || r[2] || null,
+      email: r[3] || null,
+      goal: r[4] || null,
+      lifeStage: r[5] || r[6] || null,
+      breastfeeding: r[7] || null,
+      firstSeen: r[8],
+      lastSeen: r[9],
+      totalEvents: r[10],
+      deviceCount: Math.max(1, r[11] - 1),
+      completedOnboarding: r[12] > 0,
+    }));
+
+    // --- Auto-detect dev/hidden users on first load ---
+    const autoDetectRan = localStorage.getItem('ph_auto_detect_done');
+    if (!autoDetectRan) {
+      allRawUsers.forEach(u => {
+        const name = (u.name || '').toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        // Tag dev / friends-just-checking-it-out users
+        const devNames = ['ishita', 'kush', 'kriti', 'stuti', 'erin', 'priyanka', 'shivani'];
+        if (devNames.some(d => name.includes(d) || email.includes(d))) {
+          if (u.personId && !devPersons.includes(u.personId)) devPersons.push(u.personId);
+        }
+        // Hide the specific anonymous user entirely
+        if (u.personId && u.personId.startsWith('019d554a-7bc8-7c9f-a')) {
+          if (!hiddenPersons.includes(u.personId)) hiddenPersons.push(u.personId);
+        }
+      });
+      savePersonLists();
+      localStorage.setItem('ph_auto_detect_done', '1');
+    }
+
+    // Auto-detect Neha and force-classify as real user
+    allRawUsers.forEach(u => {
+      const name = (u.name || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      if (name.includes('neha') || email.includes('neha')) {
+        if (u.personId && !forceRealPersons.includes(u.personId)) {
+          forceRealPersons.push(u.personId);
+        }
+        if (u.personId && !nameOverrides[u.personId] && !u.name) {
+          nameOverrides[u.personId] = 'Neha';
+        }
+      }
+    });
+    savePersonLists();
+
+    // Auto-set names for known users missing the name property
+    const knownNames = { 'estermarie@gmail.com': 'Ester' };
+    allRawUsers.forEach(u => {
+      if (!u.name && u.email && knownNames[u.email] && !nameOverrides[u.personId]) {
+        nameOverrides[u.personId] = knownNames[u.email];
+      }
+      if (nameOverrides[u.personId]) u.name = nameOverrides[u.personId];
+    });
+    savePersonLists();
+
+    // --- Build filtered user list (used by other parts of dashboard) ---
+    const excludeIds = getPersonExclusionIds();
+    allUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+
+    // Populate event user filter dropdown
+    const select = document.getElementById('eventUserFilter');
+    select.innerHTML = '<option value="">All users</option>';
+    allUsers.forEach(u => {
+      const label = u.name || u.email || u.id.substring(0, 16);
+      select.innerHTML += `<option value="${escapeHtml(u.id)}">${escapeHtml(label)}</option>`;
+    });
+
+    renderUserTable();
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">Failed to load users: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderUserTable() {
+  const container = document.getElementById('userTableContainer');
+
+  // Apply search filter
+  const q = (document.getElementById('userSearch')?.value || '').toLowerCase();
+
+  // Separate users into categories from the RAW (unfiltered) list
+  const excludeIds = getPersonExclusionIds();
+  const visibleUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+  const taggedDevUsers = allRawUsers.filter(u => devPersons.includes(u.personId) && !hiddenPersons.includes(u.personId));
+  const taggedHiddenUsers = allRawUsers.filter(u => hiddenPersons.includes(u.personId));
+
+  // Apply search
+  const searchFilter = u => !q || (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q) || (u.id||'').toLowerCase().includes(q);
+  const filteredVisible = visibleUsers.filter(searchFilter);
+  const filteredDev = taggedDevUsers.filter(searchFilter);
+  const filteredHidden = taggedHiddenUsers.filter(searchFilter);
+
+  const realUsers = filteredVisible.filter(u => u.completedOnboarding || forceRealPersons.includes(u.personId));
+  const anonUsers = filteredVisible.filter(u => !u.completedOnboarding && !forceRealPersons.includes(u.personId));
+
+  if (filteredVisible.length === 0 && filteredDev.length === 0 && filteredHidden.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128100;</div><p>No users found</p></div>';
+    return;
+  }
+
+  let html = '';
+
+  // Summary banner
+  html += `<div style="padding:12px 16px; background:var(--success-bg); border-radius:var(--radius-sm); margin-bottom:16px; font-size:13px; color:var(--sage);">
+    <strong>${realUsers.length} real user${realUsers.length !== 1 ? 's' : ''}</strong> (completed onboarding)
+    &nbsp;&middot;&nbsp; ${anonUsers.length} anonymous
+    ${taggedDevUsers.length > 0 ? `&nbsp;&middot;&nbsp; <span style="color:#856404;">${taggedDevUsers.length} tagged dev</span>` : ''}
+    ${taggedHiddenUsers.length > 0 ? `&nbsp;&middot;&nbsp; <span style="color:var(--error);">${taggedHiddenUsers.length} hidden</span>` : ''}
+  </div>`;
+
+  // Real users table
+  if (realUsers.length > 0) {
+    html += `<h3 style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--text-primary);">&#9989; Real Users</h3>`;
+    html += buildUserTableHtml(realUsers, 'visible');
+    html += '<div style="height:24px;"></div>';
+  }
+
+  // Anonymous sessions
+  if (anonUsers.length > 0) {
+    html += `<details style="margin-bottom:12px;">
+      <summary style="font-size:14px; font-weight:700; cursor:pointer; color:var(--text-muted); margin-bottom:10px;">
+        &#128683; Anonymous Sessions (${anonUsers.length}) — likely dev/simulator noise
+      </summary>`;
+    html += buildUserTableHtml(anonUsers, 'visible');
+    html += '</details>';
+  }
+
+  // Dev-tagged users (shown in all modes for management, collapsed in production)
+  if (filteredDev.length > 0) {
+    html += `<details ${envFilter !== 'production' ? 'open' : ''} style="margin-bottom:12px;">
+      <summary style="font-size:14px; font-weight:700; cursor:pointer; color:#856404; margin-bottom:10px;">
+        &#128736; Dev-Tagged Users (${filteredDev.length}) — excluded from production stats
+      </summary>`;
+    html += buildUserTableHtml(filteredDev, 'dev');
+    html += '</details>';
+  }
+
+  // Hidden users
+  if (filteredHidden.length > 0) {
+    html += `<details style="margin-bottom:12px;">
+      <summary style="font-size:14px; font-weight:700; cursor:pointer; color:var(--error); margin-bottom:10px;">
+        &#128683; Hidden Users (${filteredHidden.length}) — removed from all views
+      </summary>`;
+    html += buildUserTableHtml(filteredHidden, 'hidden');
+    html += '</details>';
+  }
+
+  container.innerHTML = html;
+}
+
+function buildUserTableHtml(users, section) {
+  let html = `<table class="user-table">
+    <thead><tr>
+      <th>User</th><th>Goal</th><th>Life Stage</th><th>Events</th><th>Devices</th><th>First Seen</th><th>Last Active</th><th>Actions</th>
+    </tr></thead><tbody>`;
+
+  users.forEach(u => {
+    const name = u.name || u.email || u.id.substring(0, 20);
+    const sub = u.email && u.name ? u.email : (u.personId ? u.personId.substring(0, 16) : u.id.substring(0, 24));
+    const first = u.firstSeen ? new Date(u.firstSeen).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '--';
+    const last = u.lastSeen ? timeAgo(new Date(u.lastSeen)) : '--';
+    const pid = escapeHtml(u.personId || u.id);
+
+    // Action buttons depend on current section
+    let actions = `<button class="btn-action" onclick="event.stopPropagation(); renameUser('${pid}')">Rename</button>`;
+    if (section === 'visible') {
+      actions += `
+        <button class="btn-action" onclick="event.stopPropagation(); tagUserDev('${pid}')">Tag Dev</button>
+        <button class="btn-action btn-danger" onclick="event.stopPropagation(); hideUser('${pid}')">Hide</button>`;
+    } else if (section === 'dev') {
+      actions += `
+        <button class="btn-action" onclick="event.stopPropagation(); untagUserDev('${pid}')">Restore</button>
+        <button class="btn-action btn-danger" onclick="event.stopPropagation(); hideUser('${pid}')">Hide</button>`;
+    } else if (section === 'hidden') {
+      actions += `
+        <button class="btn-action" onclick="event.stopPropagation(); restoreUser('${pid}')">Restore</button>`;
+    }
+
+    html += `<tr onclick="showUserDetail('${escapeHtml(u.id)}')">
+      <td>
+        <div class="user-name">${escapeHtml(name)}</div>
+        <div style="font-size:11px;color:var(--text-muted);">${escapeHtml(sub)}</div>
+      </td>
+      <td>${u.goal ? `<span class="badge badge-goal">${formatLabel(u.goal)}</span>` : '--'}</td>
+      <td>${u.lifeStage ? `<span class="badge badge-stage">${formatLabel(u.lifeStage)}</span>` : '--'}
+          ${u.breastfeeding ? ' <span class="badge badge-bf">BF</span>' : ''}</td>
+      <td>${u.totalEvents}</td>
+      <td>${u.deviceCount || 1}</td>
+      <td>${first}</td>
+      <td>${last}</td>
+      <td class="user-actions">${actions}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  return html;
+}
+
+// ========== USER MANAGEMENT ACTIONS ==========
+function tagUserDev(personId) {
+  if (!devPersons.includes(personId)) devPersons.push(personId);
+  savePersonLists();
+  // Update filtered allUsers and re-render
+  const excludeIds = getPersonExclusionIds();
+  allUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+  renderUserTable();
+  // Reload stats so they reflect the change
+  loadTopStats(); loadFunnel();
+}
+
+function untagUserDev(personId) {
+  devPersons = devPersons.filter(id => id !== personId);
+  savePersonLists();
+  const excludeIds = getPersonExclusionIds();
+  allUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+  renderUserTable();
+  loadTopStats(); loadFunnel();
+}
+
+function hideUser(personId) {
+  if (!hiddenPersons.includes(personId)) hiddenPersons.push(personId);
+  // Also remove from dev list if present
+  devPersons = devPersons.filter(id => id !== personId);
+  savePersonLists();
+  const excludeIds = getPersonExclusionIds();
+  allUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+  renderUserTable();
+  loadTopStats(); loadFunnel();
+}
+
+function restoreUser(personId) {
+  hiddenPersons = hiddenPersons.filter(id => id !== personId);
+  savePersonLists();
+  const excludeIds = getPersonExclusionIds();
+  allUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+  renderUserTable();
+  loadTopStats(); loadFunnel();
+}
+
+function renameUser(personId) {
+  const current = nameOverrides[personId] || '';
+  const newName = prompt('Enter display name for this user:', current);
+  if (newName === null) return; // cancelled
+  if (newName.trim()) {
+    nameOverrides[personId] = newName.trim();
+  } else {
+    delete nameOverrides[personId];
+  }
+  savePersonLists();
+  // Update the name in allRawUsers
+  allRawUsers.forEach(u => {
+    if (u.personId === personId) u.name = nameOverrides[personId] || u.email || null;
+  });
+  const excludeIds = getPersonExclusionIds();
+  allUsers = allRawUsers.filter(u => !excludeIds.includes(u.personId));
+  renderUserTable();
+}
+
+function filterUsers() {
+  renderUserTable();
+}
+
+function timeAgo(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  return days + 'd ago';
+}
+
+// ========== USER DETAIL ==========
+async function showUserDetail(userId) {
+  document.getElementById('userListView').style.display = 'none';
+  const panel = document.getElementById('userDetailView');
+  panel.classList.add('active');
+
+  const user = allUsers.find(u => u.id === userId) || { id: userId };
+
+  panel.innerHTML = `<div class="loading"><div class="spinner"></div>Loading user activity...</div>`;
+
+  // Use person.id to capture events across all devices / reinstalls
+  const personId = user.personId || userId;
+  const userFilter = `person.id = '${personId}'`;
+
+  try {
+    const [eventsRes, statsRes, personRes, onbTimeRes] = await Promise.all([
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT event, timestamp, properties FROM events WHERE ${userFilter} ORDER BY timestamp DESC LIMIT 100` }),
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT event, count() AS cnt FROM events WHERE ${userFilter} AND event IN ('meal_logged','coach_message_sent','feeding_logged','weight_logged','insight_card_tapped','mood_logged','habit_completed','phase_detail_opened') GROUP BY event` }),
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT properties FROM persons WHERE id = '${personId}' LIMIT 1` }),
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT min(timestamp) FROM events WHERE ${userFilter} AND event = 'onboarding_completed'` }),
+    ]);
+
+    // Build stat counts from grouped query
+    const statMap = {};
+    (statsRes.results || []).forEach(r => { statMap[r[0]] = r[1]; });
+    const meals = statMap['meal_logged'] || 0;
+    const coach = statMap['coach_message_sent'] || 0;
+    const feeds = statMap['feeding_logged'] || 0;
+    const weight = statMap['weight_logged'] || 0;
+    const insights = statMap['insight_card_tapped'] || 0;
+    const moods = statMap['mood_logged'] || 0;
+    const habits = statMap['habit_completed'] || 0;
+    const phaseViews = statMap['phase_detail_opened'] || 0;
+    const name = user.name || user.email || user.id.substring(0, 20);
+
+    // Extract person properties directly from the persons table
+    let profile = null;
+    if (personRes.results && personRes.results.length > 0) {
+      const raw = personRes.results[0][0];
+      profile = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    }
+    const onbTimeVal = extractValue(onbTimeRes);
+    const onbTime = onbTimeVal ? new Date(onbTimeVal) : null;
+
+    let html = `
+      <div class="user-detail-header">
+        <button class="back-btn" onclick="hideUserDetail()">&#8592; Back</button>
+        <div>
+          <h2>${escapeHtml(name)}</h2>
+          <div class="user-meta">${escapeHtml(user.id)} ${user.goal ? '&middot; ' + formatLabel(user.goal) : ''} ${user.lifeStage ? '&middot; ' + formatLabel(user.lifeStage) : ''}</div>
+        </div>
+      </div>
+
+      <div class="user-stats-grid">
+        <div class="user-stat-mini"><div class="label">Total Events</div><div class="val">${user.totalEvents || '--'}</div></div>
+        <div class="user-stat-mini"><div class="label">Meals Logged</div><div class="val">${meals}</div></div>
+        <div class="user-stat-mini"><div class="label">Coach Messages</div><div class="val">${coach}</div></div>
+        <div class="user-stat-mini"><div class="label">Feeds Logged</div><div class="val">${feeds}</div></div>
+        <div class="user-stat-mini"><div class="label">Weight Logs</div><div class="val">${weight}</div></div>
+        <div class="user-stat-mini"><div class="label">Insights Tapped</div><div class="val">${insights}</div></div>
+        <div class="user-stat-mini"><div class="label">Moods Logged</div><div class="val">${moods}</div></div>
+        <div class="user-stat-mini"><div class="label">Habits Completed</div><div class="val">${habits}</div></div>
+        <div class="user-stat-mini"><div class="label">Phase Views</div><div class="val">${phaseViews}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Onboarding Profile</span></div>
+        <div class="card-body">
+          ${profile ? `
+            <table class="events-table">
+              <tbody>
+                ${profile.goal ? `<tr><td style="font-weight:600;width:160px">Goal</td><td>${escapeHtml(formatLabel(profile.goal))}</td></tr>` : ''}
+                ${profile.life_stage ? `<tr><td style="font-weight:600">Life Stage</td><td>${escapeHtml(formatLabel(profile.life_stage))}</td></tr>` : ''}
+                ${profile.menopauseStage ? `<tr><td style="font-weight:600">Menopause Stage</td><td>${escapeHtml(formatLabel(profile.menopauseStage))}</td></tr>` : ''}
+                ${profile.age ? `<tr><td style="font-weight:600">Age</td><td>${escapeHtml(String(profile.age))}</td></tr>` : ''}
+                ${profile.activity_level ? `<tr><td style="font-weight:600">Activity Level</td><td>${escapeHtml(formatLabel(profile.activity_level))}</td></tr>` : ''}
+                ${profile.coachingStyle ? `<tr><td style="font-weight:600">Coaching Style</td><td>${escapeHtml(formatLabel(profile.coachingStyle))}</td></tr>` : ''}
+                ${profile.breastfeeding && profile.breastfeeding !== 'false' ? `<tr><td style="font-weight:600">Breastfeeding</td><td>${escapeHtml(formatLabel(String(profile.breastfeeding)))}</td></tr>` : ''}
+                ${profile.email ? `<tr><td style="font-weight:600">Email</td><td>${escapeHtml(profile.email)}</td></tr>` : ''}
+                ${onbTime ? `<tr><td style="font-weight:600">Completed</td><td>${onbTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ${onbTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td></tr>` : ''}
+              </tbody>
+            </table>
+          ` : '<div style="color:#999;padding:8px 0">No onboarding data found</div>'}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Recent Activity</span></div>
+        <div class="card-body"><div class="table-wrap">
+          <table class="events-table"><thead><tr><th>Event</th><th>Properties</th><th>Time</th></tr></thead><tbody>`;
+
+    (eventsRes.results || []).forEach(r => {
+      const eName = r[0];
+      const ts = new Date(r[1]);
+      const props = r[2];
+      const propsStr = props ? JSON.stringify(props).substring(0, 120) : '';
+      html += `<tr>
+        <td><span class="event-name-badge">${escapeHtml(eName)}</span></td>
+        <td title="${escapeHtml(propsStr)}">${escapeHtml(propsStr)}</td>
+        <td class="event-time">${ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div></div></div>';
+    panel.innerHTML = html;
+  } catch (err) {
+    panel.innerHTML = `<div class="user-detail-header"><button class="back-btn" onclick="hideUserDetail()">&#8592; Back</button><div><h2>Error</h2></div></div><div class="error-msg">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function hideUserDetail() {
+  document.getElementById('userListView').style.display = 'block';
+  document.getElementById('userDetailView').classList.remove('active');
+}
+
+// ========== RETENTION ==========
+
+// Build a WHERE clause fragment that combines env + person exclusion for manual use in subqueries
+function buildFilterClause() {
+  const parts = [];
+  if (envFilter !== 'all') {
+    parts.push(envFilter === 'production'
+      ? "(properties.environment = 'production' OR properties.environment IS NULL)"
+      : "properties.environment = 'development'");
+  }
+  const excludeIds = getPersonExclusionIds();
+  if (excludeIds.length > 0) {
+    parts.push(`person.id NOT IN (${excludeIds.map(id => `'${id}'`).join(',')})`);
+  }
+  return parts.length > 0 ? parts.join(' AND ') : '1=1';
+}
+
+async function loadRetentionData() {
+  try {
+    const fc = buildFilterClause();
+
+    // Only count onboarded (real) users for retention metrics
+    const onbFilter = `person.id IN (SELECT DISTINCT person.id FROM events WHERE ${fc} AND event = 'onboarding_completed')`;
+
+    // Daily return: users who were active yesterday AND today
+    // Use manually filtered queries to handle subqueries properly
+    const tz = DASHBOARD_TZ;
+    const [dailyBothRes, dailyYestRes, weeklyRes, totalUsersRes, monthlyRes] = await Promise.all([
+      posthogQuery({ kind: 'HogQLQuery',
+        query: `SELECT count(DISTINCT person.id) FROM events WHERE ${fc} AND ${onbFilter} AND timestamp >= toDate(toTimeZone(now(), '${tz}')) AND person.id IN (SELECT DISTINCT person.id FROM events WHERE ${fc} AND toDate(toTimeZone(timestamp, '${tz}')) = toDate(toTimeZone(now(), '${tz}')) - 1)` }, { skipPersonFilter: true }),
+      posthogQuery({ kind: 'HogQLQuery',
+        query: `SELECT count(DISTINCT person.id) FROM events WHERE ${fc} AND ${onbFilter} AND toDate(toTimeZone(timestamp, '${tz}')) = toDate(toTimeZone(now(), '${tz}')) - 1` }, { skipPersonFilter: true }),
+      posthogQuery({ kind: 'HogQLQuery',
+        query: `SELECT count(DISTINCT person.id) FROM events WHERE ${fc} AND ${onbFilter} AND timestamp >= toDate(toTimeZone(now(), '${tz}')) - INTERVAL 7 DAY GROUP BY person.id HAVING count(DISTINCT toDate(toTimeZone(timestamp, '${tz}'))) >= 2` }, { skipPersonFilter: true }),
+      posthogQuery({ kind: 'HogQLQuery',
+        query: `SELECT count(DISTINCT person.id) FROM events WHERE ${fc} AND ${onbFilter}` }, { skipPersonFilter: true }),
+      posthogQuery({ kind: 'HogQLQuery',
+        query: `SELECT count(DISTINCT person.id) FROM events WHERE ${fc} AND ${onbFilter} AND timestamp >= toDate(toTimeZone(now(), '${tz}')) - INTERVAL 30 DAY` }, { skipPersonFilter: true }),
+    ]);
+
+    const dailyBoth = extractValue(dailyBothRes);
+    const dailyYest = extractValue(dailyYestRes);
+    const totalUsers = extractValue(totalUsersRes);
+    const monthlyActive = extractValue(monthlyRes);
+
+    // Weekly: count of users in weeklyRes result
+    let weeklyCount = 0;
+    if (weeklyRes?.results) weeklyCount = weeklyRes.results.length;
+
+    const dailyRate = dailyYest > 0 ? Math.round((dailyBoth / dailyYest) * 100) : 0;
+    const weeklyActiveInWeek = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT count(DISTINCT person.id) FROM events WHERE ${fc} AND ${onbFilter} AND timestamp >= toDate(toTimeZone(now(), '${tz}')) - INTERVAL 7 DAY` }, { skipPersonFilter: true });
+    const weeklyTotal = extractValue(weeklyActiveInWeek);
+    const weeklyRate = weeklyTotal > 0 ? Math.round((weeklyCount / weeklyTotal) * 100) : 0;
+    const monthlyRate = totalUsers > 0 ? Math.round((monthlyActive / totalUsers) * 100) : 0;
+
+    document.getElementById('retDaily').textContent = dailyRate + '%';
+    document.getElementById('retWeekly').textContent = weeklyRate + '%';
+    document.getElementById('retMonthly').textContent = monthlyRate + '%';
+
+    // Load 30-day DAU chart
+    loadRetentionChart();
+    loadHeatmap();
+  } catch (err) {
+    console.error('Retention error:', err);
+    ['retDaily', 'retWeekly', 'retMonthly'].forEach(id => document.getElementById(id).textContent = '--');
+  }
+}
+
+async function loadRetentionChart() {
+  const loading = document.getElementById('retentionLoading');
+  try {
+    const fc = buildFilterClause();
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT toDate(toTimeZone(timestamp, '${DASHBOARD_TZ}')) AS day, count(DISTINCT person.id) AS users FROM events WHERE ${fc} AND timestamp >= toDate(toTimeZone(now(), '${DASHBOARD_TZ}')) - INTERVAL 30 DAY AND person.id IN (SELECT DISTINCT person.id FROM events WHERE ${fc} AND event = 'onboarding_completed') GROUP BY day ORDER BY day` }, { skipPersonFilter: true });
+
+    loading.style.display = 'none';
+    const labels = (res.results||[]).map(r => { const d = new Date(r[0]); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); });
+    const data = (res.results||[]).map(r => r[1]);
+
+    if (chartInstances['retentionChart']) chartInstances['retentionChart'].destroy();
+    const ctx = document.getElementById('retentionChart').getContext('2d');
+    chartInstances['retentionChart'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'DAU', data, backgroundColor: 'rgba(95,138,109,0.6)', borderRadius: 4 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor() }, grid: { color: gridColor() } }, x: { ticks: { color: textColor(), maxRotation: 45 }, grid: { display: false } } },
+        plugins: { legend: { display: false } },
+      },
+    });
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+async function loadHeatmap() {
+  const container = document.getElementById('heatmapContainer');
+  try {
+    // Only show users who completed onboarding (real users)
+    const fc = buildFilterClause();
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT person.id AS pid, any(person.properties.name) AS name, any(person.properties.email) AS email, toDate(toTimeZone(timestamp, '${DASHBOARD_TZ}')) AS day, count() AS events
+        FROM events WHERE ${fc} AND timestamp >= toDate(toTimeZone(now(), '${DASHBOARD_TZ}')) - INTERVAL 14 DAY
+        AND person.id IN (SELECT DISTINCT person.id FROM events WHERE ${fc} AND event = 'onboarding_completed')
+        GROUP BY pid, day ORDER BY pid, day` }, { skipPersonFilter: true });
+
+    // Build grid: rows = users (by person.id), cols = days
+    // Also client-side filter excluded persons as a safety net
+    const excludeIds = getPersonExclusionIds();
+    const userDays = {};
+    const userNames = {};
+    const allDays = new Set();
+    (res.results||[]).forEach(r => {
+      const uid = r[0]; const name = r[1]; const email = r[2]; const day = r[3]; const cnt = r[4];
+      if (excludeIds.includes(uid)) return; // skip excluded users
+      if (!userDays[uid]) userDays[uid] = {};
+      userDays[uid][day] = (userDays[uid][day] || 0) + cnt;
+      userNames[uid] = name || email || (uid ? uid.substring(0, 12) : 'Unknown');
+      allDays.add(day);
+    });
+
+    const days = [...allDays].sort();
+    const users = Object.keys(userDays);
+
+    if (users.length === 0 || days.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128197;</div><p>Not enough data for heatmap</p></div>';
+      return;
+    }
+
+    const cols = days.length + 1;
+    let html = `<div class="retention-grid" style="grid-template-columns: 120px repeat(${days.length}, 1fr);">`;
+
+    // Header row
+    html += '<div class="retention-header">User</div>';
+    days.forEach(d => {
+      const date = new Date(d);
+      html += `<div class="retention-header">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>`;
+    });
+
+    // User rows
+    users.slice(0, 30).forEach(uid => {
+      const label = userNames[uid] || uid.substring(0, 12);
+      html += `<div class="retention-header" style="text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(uid)}">${escapeHtml(label)}</div>`;
+      days.forEach(d => {
+        const cnt = userDays[uid]?.[d] || 0;
+        const intensity = cnt === 0 ? 0 : Math.min(1, cnt / 20);
+        const bg = cnt === 0 ? (isDark() ? '#2A2E2C' : '#F0F0ED')
+          : `rgba(95,138,109,${0.2 + intensity * 0.8})`;
+        const textC = intensity > 0.5 ? 'white' : (cnt === 0 ? 'var(--text-muted)' : 'var(--text-primary)');
+        html += `<div class="retention-cell" style="background:${bg}; color:${textC};" title="${cnt} events">${cnt || ''}</div>`;
+      });
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`;
+  }
+}
+
+// ========== FEATURES ==========
+async function loadFeatureData() {
+  loadFeatureAdoption();
+  loadFeatureVolume();
+  loadFeatureTimeline();
+}
+
+async function loadFeatureAdoption() {
+  const loading = document.getElementById('featureAdoptionLoading');
+  try {
+    const totalUsersRes = await posthogQuery({ kind: 'HogQLQuery',
+      query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'onboarding_completed'" });
+    const totalUsers = Math.max(1, extractValue(totalUsersRes));
+
+    const features = Object.keys(FEATURE_EVENTS);
+    const queries = features.map(f => {
+      const events = FEATURE_EVENTS[f].map(e => `'${e}'`).join(',');
+      return posthogQuery({ kind: 'HogQLQuery',
+        query: `SELECT count(DISTINCT person.id) FROM events WHERE event IN (${events})` });
+    });
+
+    const results = await Promise.all(queries);
+    loading.style.display = 'none';
+
+    const labels = features;
+    const data = results.map(r => Math.round((extractValue(r) / totalUsers) * 100));
+
+    if (chartInstances['featureAdoptionChart']) chartInstances['featureAdoptionChart'].destroy();
+    const ctx = document.getElementById('featureAdoptionChart').getContext('2d');
+    chartInstances['featureAdoptionChart'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: '% of Users', data, backgroundColor: 'rgba(95,138,109,0.7)', borderRadius: 6 }] },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: { x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', color: textColor() }, grid: { color: gridColor() } }, y: { ticks: { color: textColor() }, grid: { display: false } } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.raw + '% of users' } } },
+      },
+    });
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+async function loadFeatureVolume() {
+  const loading = document.getElementById('featureVolumeLoading');
+  try {
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT event, count() AS cnt FROM events
+        WHERE event IN ('meal_logged','coach_message_sent','weight_logged','feeding_logged','period_logged','quick_action_used','insight_card_tapped','phase_detail_opened','day_navigated','habit_completed','mood_logged')
+        GROUP BY event ORDER BY cnt DESC` });
+
+    loading.style.display = 'none';
+    const labels = (res.results||[]).map(r => formatLabel(r[0]));
+    const data = (res.results||[]).map(r => r[1]);
+    const colors = ['#5F8A6D','#E8A87C','#A5C4D4','#C48A7A','#C4A5D4','#D4C4A5','#78AC86','#B07A6A','#84BD93'];
+
+    if (chartInstances['featureVolumeChart']) chartInstances['featureVolumeChart'].destroy();
+    const ctx = document.getElementById('featureVolumeChart').getContext('2d');
+    chartInstances['featureVolumeChart'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, data.length), borderRadius: 6 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { color: textColor() }, grid: { color: gridColor() } }, x: { ticks: { color: textColor(), maxRotation: 45 }, grid: { display: false } } },
+        plugins: { legend: { display: false } },
+      },
+    });
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+async function loadFeatureTimeline() {
+  const loading = document.getElementById('featureTimeLoading');
+  try {
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT toDate(toTimeZone(timestamp, '${DASHBOARD_TZ}')) AS day, event, count() AS cnt FROM events
+        WHERE timestamp >= toDate(toTimeZone(now(), '${DASHBOARD_TZ}')) - INTERVAL 14 DAY
+        AND event IN ('meal_logged','coach_message_sent','weight_logged','feeding_logged','habit_completed','insight_card_tapped')
+        GROUP BY day, event ORDER BY day` });
+
+    loading.style.display = 'none';
+
+    const dayMap = {};
+    const eventSet = new Set();
+    (res.results||[]).forEach(r => {
+      const day = r[0]; const ev = r[1]; const cnt = r[2];
+      if (!dayMap[day]) dayMap[day] = {};
+      dayMap[day][ev] = cnt;
+      eventSet.add(ev);
+    });
+
+    const days = Object.keys(dayMap).sort();
+    const labels = days.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const eventColors = { 'meal_logged': '#5F8A6D', 'coach_message_sent': '#E8A87C', 'weight_logged': '#A5C4D4', 'feeding_logged': '#C48A7A', 'habit_completed': '#C4A5D4', 'insight_card_tapped': '#78AC86' };
+
+    const datasets = [...eventSet].map(ev => ({
+      label: formatLabel(ev),
+      data: days.map(d => dayMap[d]?.[ev] || 0),
+      borderColor: eventColors[ev] || '#999',
+      backgroundColor: 'transparent',
+      tension: 0.3, pointRadius: 3,
+    }));
+
+    if (chartInstances['featureTimeChart']) chartInstances['featureTimeChart'].destroy();
+    const ctx = document.getElementById('featureTimeChart').getContext('2d');
+    chartInstances['featureTimeChart'] = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor() }, grid: { color: gridColor() } }, x: { ticks: { color: textColor() }, grid: { display: false } } },
+        plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, color: textColor() } } },
+      },
+    });
+  } catch (err) { loading.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`; }
+}
+
+// ========== COACH ==========
+async function loadCoachData() {
+  try {
+    const [totalRes, usersRes, dailyRes, leaderRes, timelineRes] = await Promise.all([
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count() FROM events WHERE event = 'coach_message_sent'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT count(DISTINCT person.id) FROM events WHERE event = 'coach_message_sent'" }),
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT count(DISTINCT toDate(toTimeZone(timestamp, '${DASHBOARD_TZ}'))) AS days, count() AS msgs FROM events WHERE event = 'coach_message_sent'` }),
+      posthogQuery({ kind: 'HogQLQuery', query: "SELECT person.id, any(person.properties.name) AS name, any(person.properties.email) AS email, count() AS cnt FROM events WHERE event = 'coach_message_sent' GROUP BY person.id ORDER BY cnt DESC LIMIT 20" }),
+      posthogQuery({ kind: 'HogQLQuery', query: `SELECT toDate(toTimeZone(timestamp, '${DASHBOARD_TZ}')) AS day, count() AS msgs FROM events WHERE event = 'coach_message_sent' AND timestamp >= toDate(toTimeZone(now(), '${DASHBOARD_TZ}')) - INTERVAL 30 DAY GROUP BY day ORDER BY day` }),
+    ]);
+
+    const total = extractValue(totalRes);
+    const users = extractValue(usersRes);
+    const days = dailyRes?.results?.[0]?.[0] || 1;
+    const msgs = dailyRes?.results?.[0]?.[1] || 0;
+
+    document.getElementById('coachTotal').textContent = total;
+    document.getElementById('coachUsers').textContent = users;
+    document.getElementById('coachAvg').textContent = users > 0 ? (total / users).toFixed(1) : '0';
+    document.getElementById('coachDaily').textContent = days > 0 ? (msgs / days).toFixed(1) : '0';
+
+    // Timeline chart
+    const loading = document.getElementById('coachTimeLoading');
+    loading.style.display = 'none';
+    const labels = (timelineRes.results||[]).map(r => new Date(r[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const data = (timelineRes.results||[]).map(r => r[1]);
+
+    if (chartInstances['coachTimeChart']) chartInstances['coachTimeChart'].destroy();
+    const ctx = document.getElementById('coachTimeChart').getContext('2d');
+    chartInstances['coachTimeChart'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Messages', data, backgroundColor: 'rgba(232,168,124,0.7)', borderRadius: 4 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor() }, grid: { color: gridColor() } }, x: { ticks: { color: textColor(), maxRotation: 45 }, grid: { display: false } } },
+        plugins: { legend: { display: false } },
+      },
+    });
+
+    // Leaderboard
+    const lb = document.getElementById('coachLeaderboard');
+    if (leaderRes?.results?.length > 0) {
+      let lbHtml = `<table class="user-table"><thead><tr><th>#</th><th>User</th><th>Messages</th></tr></thead><tbody>`;
+      leaderRes.results.forEach((r, i) => {
+        // r = [person.id, name, email, count]
+        const name = r[1] || r[2] || (r[0] ? r[0].substring(0, 20) : 'Unknown');
+        lbHtml += `<tr><td>${i + 1}</td><td class="user-name">${escapeHtml(name)}</td><td>${r[3]}</td></tr>`;
+      });
+      lbHtml += '</tbody></table>';
+      lb.innerHTML = lbHtml;
+    } else {
+      lb.innerHTML = '<div class="empty-state"><p>No coach messages yet</p></div>';
+    }
+  } catch (err) {
+    console.error('Coach data error:', err);
+  }
+}
+
+// ========== EVENTS ==========
+async function loadRecentEvents() {
+  const container = document.getElementById('eventsTableContainer');
+  try {
+    const res = await posthogQuery({ kind: 'HogQLQuery',
+      query: `SELECT event, distinct_id, timestamp, properties FROM events
+        ORDER BY timestamp DESC LIMIT 200` });
+
+    allEvents = (res.results||[]).map(r => ({
+      event: r[0], userId: r[1], timestamp: r[2], properties: r[3]
+    }));
+
+    renderEvents(allEvents);
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg">Failed to load events: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function renderEvents(events) {
+  const container = document.getElementById('eventsTableContainer');
+  if (events.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">&#128203;</div><p>No events found</p></div>';
+    return;
+  }
+
+  let html = `<table class="events-table"><thead><tr><th>Event</th><th>User</th><th>Properties</th><th>Time</th></tr></thead><tbody>`;
+  events.slice(0, 100).forEach(e => {
+    const user = allUsers.find(u => u.id === e.userId);
+    const userName = user?.name || user?.email || e.userId.substring(0, 16);
+    const ts = new Date(e.timestamp);
+    const propsStr = e.properties ? JSON.stringify(e.properties).substring(0, 80) : '';
+
+    html += `<tr>
+      <td><span class="event-name-badge">${escapeHtml(e.event)}</span></td>
+      <td style="font-size:12px;">${escapeHtml(userName)}</td>
+      <td title="${escapeHtml(JSON.stringify(e.properties||{}))}" style="font-size:11px; color:var(--text-muted);">${escapeHtml(propsStr)}</td>
+      <td class="event-time">${ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function filterEvents() {
+  const q = document.getElementById('eventSearch').value.toLowerCase();
+  const userFilter = document.getElementById('eventUserFilter').value;
+  const filtered = allEvents.filter(e => {
+    if (userFilter && e.userId !== userFilter) return false;
+    if (q && !e.event.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  renderEvents(filtered);
+}
+</script>
+</body>
+</html>
