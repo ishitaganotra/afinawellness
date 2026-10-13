@@ -46,8 +46,8 @@
     }
     .nav-logo { display: flex; align-items: center; gap: 8px; }
     .nav-logo-icon { width: 26px; height: 26px; flex-shrink: 0; }
-    .nav-logo-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
-    .nav-logo-descriptor { font-size: 9px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6460; line-height: 1; }
+    .nav-logo-desc { font-size: 11px; font-weight: 500; color: #6B6460; line-height: 1.2; white-space: nowrap; padding-left: 10px; border-left: 1px solid #D9D3DC; }
+    @media (max-width: 640px) { .nav-logo-desc { display: none; } }
     .nav-logo-text { font-size: 18px; font-weight: 700; color: #2B2322; letter-spacing: -0.01em; line-height: 1; }
     .nav-beta {
       font-size: 11px; font-weight: 600; color: #6B6460;
@@ -190,7 +190,7 @@
       <div class="nav-inner">
         <a href="/" class="nav-logo">
           <img src="../assets/Afina_wordmark.svg" alt="Afina icon" class="nav-logo-icon">
-          <span class="nav-logo-stack"><span class="nav-logo-text">Afina</span><span class="nav-logo-descriptor">Wellness</span></span>
+          <span class="nav-logo-text">Afina</span><span class="nav-logo-desc">Hormone-aware<br>tracker</span>
           <span class="nav-beta">Beta</span>
         </a>
         <div class="nav-links">
