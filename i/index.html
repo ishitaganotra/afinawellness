@@ -134,7 +134,7 @@
         <button class="copy-btn" id="copyBtn" type="button">Copy</button>
       </div>
       <div class="rule"></div>
-      <p class="how">Download the app, sign up, and tap <strong>"Have an invite code?"</strong> to enter it. Your first 2 months are free.</p>
+      <p class="how">Download the app on this phone and sign up. Your 2 free months apply on their own. If they don't, enter this code under <strong>Profile</strong> within 3 days.</p>
     </div>
 
     <a class="cta" href="https://apps.apple.com/app/id6761498641">Download on the App Store</a>
@@ -158,6 +158,24 @@
         var pretty = name.charAt(0) + name.slice(1).toLowerCase();
         document.getElementById('headline').innerHTML =
           pretty + ' gave you<br>2 free months, <em>on us</em>';
+      }
+
+      // Attribution: record this visit so the app can apply the code by
+      // itself on first open (same network and OS version, within 72 hours;
+      // the app repo's supabase/functions/invite-link). Link-preview crawlers
+      // are not phones about to install; skip them. The key is the public one.
+      if (!/bot|crawler|spider|facebookexternalhit|Twitterbot|Slackbot|WhatsApp|TelegramBot|Discordbot|LinkedInBot/i.test(navigator.userAgent)) {
+        try {
+          fetch('https://bjyyboefsovqdlwuuadc.supabase.co/functions/v1/invite-link/click', {
+            method: 'POST',
+            keepalive: true,
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': 'sb_publishable_zF_N-t1PoCftQm4k3ocl4g_3a99_uaD'
+            },
+            body: JSON.stringify({ code: code })
+          }).catch(function () {});
+        } catch (e) {}
       }
     } else {
       document.getElementById('codeCard').style.display = 'none';
