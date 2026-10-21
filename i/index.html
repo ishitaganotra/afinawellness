@@ -168,9 +168,12 @@
       // dropped silently by Safari on iOS.
       if (!/bot|crawler|spider|facebookexternalhit|Twitterbot|Slackbot|WhatsApp|TelegramBot|Discordbot|LinkedInBot/i.test(navigator.userAgent)) {
         try {
+          // Screen size + pixel ratio is the device signal; Safari's user
+          // agent freezes the iOS version, so it cannot be used for that.
+          var screenKey = (window.screen ? screen.width + 'x' + screen.height : '0x0') + '@' + (window.devicePixelRatio || 1);
           fetch('https://bjyyboefsovqdlwuuadc.supabase.co/functions/v1/invite-link/click', {
             method: 'POST',
-            body: JSON.stringify({ code: code })
+            body: JSON.stringify({ code: code, screen: screenKey })
           }).catch(function () {});
         } catch (e) {}
       }
