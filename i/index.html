@@ -163,16 +163,13 @@
       // Attribution: record this visit so the app can apply the code by
       // itself on first open (same network and OS version, within 72 hours;
       // the app repo's supabase/functions/invite-link). Link-preview crawlers
-      // are not phones about to install; skip them. The key is the public one.
+      // are not phones about to install; skip them. Deliberately a plain
+      // request with no headers: anything that needs a CORS preflight was
+      // dropped silently by Safari on iOS.
       if (!/bot|crawler|spider|facebookexternalhit|Twitterbot|Slackbot|WhatsApp|TelegramBot|Discordbot|LinkedInBot/i.test(navigator.userAgent)) {
         try {
           fetch('https://bjyyboefsovqdlwuuadc.supabase.co/functions/v1/invite-link/click', {
             method: 'POST',
-            keepalive: true,
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': 'sb_publishable_zF_N-t1PoCftQm4k3ocl4g_3a99_uaD'
-            },
             body: JSON.stringify({ code: code })
           }).catch(function () {});
         } catch (e) {}
