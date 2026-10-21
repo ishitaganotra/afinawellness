@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>beacon test</title></head>
+<body style="margin:0;background:#FCF7F5">
+<pre id="out" style="font:15px/1.5 Menlo,monospace;padding:20px;white-space:pre-wrap;word-break:break-all;color:#2D2A33">beacon test: running…</pre>
+<script>
+  var out = document.getElementById('out');
+  function log(s) { out.textContent += '\n' + s; }
+  log('UA: ' + navigator.userAgent);
+  try {
+    fetch('https://bjyyboefsovqdlwuuadc.supabase.co/functions/v1/invite-link/click', {
+      method: 'POST',
+      body: JSON.stringify({ code: 'TEST-49' })
+    }).then(function (r) { log('status ' + r.status); return r.text(); })
+      .then(function (t) { log('body ' + t); })
+      .catch(function (e) { log('FETCH ERROR ' + e); });
+  } catch (e) { log('THROW ' + e); }
+</script>
+</body></html>
